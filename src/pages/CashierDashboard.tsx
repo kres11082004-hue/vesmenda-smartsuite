@@ -3,7 +3,7 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { mockProducts, Product } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScanBarcode, Plus, Minus, Trash2, Calculator, X, ShoppingCart } from 'lucide-react';
+import { ScanBarcode, Plus, Minus, Trash2, Calculator, X, ShoppingCart, Banknote, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -21,6 +21,7 @@ const CashierDashboard = () => {
   const [calcOp, setCalcOp] = useState('');
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [cashReceived, setCashReceived] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'gcash'>('cash');
   const barcodeRef = useRef<HTMLInputElement>(null);
 
   const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
@@ -47,10 +48,15 @@ const CashierDashboard = () => {
   const removeItem = (id: string) => setCart(prev => prev.filter(i => i.product.id !== id));
 
   const handlePayment = () => {
-    if (+cashReceived < total) { toast.error('Insufficient payment'); return; }
-    toast.success(`Payment received! Change: ₱${change.toFixed(2)}`);
+    if (paymentMethod === 'cash' && +cashReceived < total) { toast.error('Insufficient payment'); return; }
+    if (paymentMethod === 'gcash') {
+      toast.success(`GCash payment of ₱${total.toLocaleString()} confirmed!`);
+    } else {
+      toast.success(`Payment received! Change: ₱${change.toFixed(2)}`);
+    }
     setCart([]);
     setCashReceived('');
+    setPaymentMethod('cash');
     setPaymentOpen(false);
   };
 
@@ -181,18 +187,63 @@ const CashierDashboard = () => {
               <p className="text-sm text-muted-foreground">Total Amount</p>
               <p className="text-3xl font-bold text-primary">₱{total.toLocaleString()}</p>
             </div>
+
+            {/* Payment Method Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Cash Received</label>
-              <Input type="number" value={cashReceived} onChange={e => setCashReceived(e.target.value)} placeholder="Enter amount" className="h-12 text-lg" autoFocus />
+              <label className="text-sm font-medium">Payment Method</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setPaymentMethod('cash')}
+                  className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${paymentMethod === 'cash' ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/30'}`}
+                >
+                  <Banknote className={`w-6 h-6 ${paymentMethod === 'cash' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <div className="text-left">
+                    <p className={`font-semibold text-sm ${paymentMethod === 'cash' ? 'text-primary' : ''}`}>Cash</p>
+                    <p className="text-[10px] text-muted-foreground">Physical payment</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setPaymentMethod('gcash')}
+                  className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${paymentMethod === 'gcash' ? 'border-[hsl(210,100%,50%)] bg-[hsl(210,100%,50%)]/5' : 'border-border hover:border-muted-foreground/30'}`}
+                >
+                  <Smartphone className={`w-6 h-6 ${paymentMethod === 'gcash' ? 'text-[hsl(210,100%,50%)]' : 'text-muted-foreground'}`} />
+                  <div className="text-left">
+                    <p className={`font-semibold text-sm ${paymentMethod === 'gcash' ? 'text-[hsl(210,100%,50%)]' : ''}`}>GCash</p>
+                    <p className="text-[10px] text-muted-foreground">Mobile payment</p>
+                  </div>
+                </button>
+              </div>
             </div>
-            {+cashReceived > 0 && (
-              <div className="p-3 rounded-lg bg-muted flex justify-between">
-                <span>Change</span>
-                <span className={`font-bold ${change >= 0 ? 'text-success' : 'text-destructive'}`}>₱{change.toFixed(2)}</span>
+
+            {paymentMethod === 'cash' && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Cash Received</label>
+                  <Input type="number" value={cashReceived} onChange={e => setCashReceived(e.target.value)} placeholder="Enter amount" className="h-12 text-lg" autoFocus />
+                </div>
+                {+cashReceived > 0 && (
+                  <div className="p-3 rounded-lg bg-muted flex justify-between">
+                    <span>Change</span>
+                    <span className={`font-bold ${change >= 0 ? 'text-success' : 'text-destructive'}`}>₱{change.toFixed(2)}</span>
+                  </div>
+                )}
+              </>
+            )}
+
+            {paymentMethod === 'gcash' && (
+              <div className="p-4 rounded-lg border border-border bg-muted/50 text-center space-y-1">
+                <Smartphone className="w-8 h-8 mx-auto text-[hsl(210,100%,50%)]" />
+                <p className="text-sm font-medium">Scan QR or confirm GCash payment</p>
+                <p className="text-xs text-muted-foreground">Amount: ₱{total.toLocaleString()}</p>
               </div>
             )}
-            <Button className="w-full h-12" onClick={handlePayment} disabled={!cashReceived || +cashReceived < total}>
-              Complete Payment
+
+            <Button
+              className="w-full h-12"
+              onClick={handlePayment}
+              disabled={paymentMethod === 'cash' ? (!cashReceived || +cashReceived < total) : cart.length === 0}
+            >
+              {paymentMethod === 'cash' ? 'Complete Cash Payment' : 'Confirm GCash Payment'}
             </Button>
           </div>
         </DialogContent>
