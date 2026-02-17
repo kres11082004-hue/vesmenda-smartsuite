@@ -53,7 +53,7 @@ export function AppSidebar() {
           </div>
           <div>
             <h2 className="font-bold text-sidebar-accent-foreground text-sm">Vesmenda's</h2>
-            <p className="text-xs text-sidebar-foreground capitalize">{user?.role} Panel</p>
+            <p className="text-xs text-sidebar-foreground capitalize">{user?.role === 'admin' ? 'Staff/Admin' : user?.role} Panel</p>
           </div>
         </div>
       </div>
