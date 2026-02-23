@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScanBarcode, Plus, Minus, Trash2, Calculator, X, ShoppingCart, Banknote, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import ReceiptDialog from '@/components/ReceiptDialog';
 
 interface CartItem {
   product: Product;
@@ -22,6 +23,8 @@ const CashierDashboard = () => {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [cashReceived, setCashReceived] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'gcash'>('cash');
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [receiptData, setReceiptData] = useState<{ items: CartItem[]; total: number; paymentMethod: 'cash' | 'gcash'; cashReceived: number; change: number; transactionId: string; date: Date } | null>(null);
   const barcodeRef = useRef<HTMLInputElement>(null);
 
   const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
@@ -49,15 +52,30 @@ const CashierDashboard = () => {
 
   const handlePayment = () => {
     if (paymentMethod === 'cash' && +cashReceived < total) { toast.error('Insufficient payment'); return; }
+    
+    const txnId = 'TXN-' + Date.now().toString(36).toUpperCase();
+    const receiptInfo = {
+      items: [...cart],
+      total,
+      paymentMethod,
+      cashReceived: +cashReceived,
+      change: paymentMethod === 'cash' ? +cashReceived - total : 0,
+      transactionId: txnId,
+      date: new Date(),
+    };
+
     if (paymentMethod === 'gcash') {
       toast.success(`GCash payment of ₱${total.toLocaleString()} confirmed!`);
     } else {
-      toast.success(`Payment received! Change: ₱${change.toFixed(2)}`);
+      toast.success(`Payment received! Change: ₱${(+cashReceived - total).toFixed(2)}`);
     }
+
+    setReceiptData(receiptInfo);
     setCart([]);
     setCashReceived('');
     setPaymentMethod('cash');
     setPaymentOpen(false);
+    setReceiptOpen(true);
   };
 
   // Calculator
@@ -272,6 +290,21 @@ const CashierDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Receipt Dialog */}
+      {receiptData && (
+        <ReceiptDialog
+          open={receiptOpen}
+          onOpenChange={setReceiptOpen}
+          items={receiptData.items}
+          total={receiptData.total}
+          paymentMethod={receiptData.paymentMethod}
+          cashReceived={receiptData.cashReceived}
+          change={receiptData.change}
+          transactionId={receiptData.transactionId}
+          date={receiptData.date}
+        />
+      )}
     </DashboardLayout>
   );
 };
