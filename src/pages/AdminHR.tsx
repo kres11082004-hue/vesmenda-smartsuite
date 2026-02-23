@@ -14,12 +14,12 @@ const AdminHR = () => {
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<Employee | null>(null);
-  const [form, setForm] = useState({ name: '', position: '', department: '', salary: '', phone: '', startDate: '' });
+  const [form, setForm] = useState({ name: '', position: '', salary: '', phone: '', startDate: '' });
 
   const filtered = employees.filter(e => e.name.toLowerCase().includes(search.toLowerCase()));
 
-  const openAdd = () => { setEditItem(null); setForm({ name: '', position: '', department: '', salary: '', phone: '', startDate: '' }); setDialogOpen(true); };
-  const openEdit = (e: Employee) => { setEditItem(e); setForm({ name: e.name, position: e.position, department: e.department, salary: e.salary.toString(), phone: e.phone, startDate: e.startDate }); setDialogOpen(true); };
+  const openAdd = () => { setEditItem(null); setForm({ name: '', position: '', salary: '', phone: '', startDate: '' }); setDialogOpen(true); };
+  const openEdit = (e: Employee) => { setEditItem(e); setForm({ name: e.name, position: e.position, salary: e.salary.toString(), phone: e.phone, startDate: e.startDate }); setDialogOpen(true); };
 
   const handleSave = () => {
     if (!form.name) { toast.error('Name is required'); return; }
@@ -27,7 +27,7 @@ const AdminHR = () => {
       setEmployees(prev => prev.map(e => e.id === editItem.id ? { ...e, ...form, salary: +form.salary } : e));
       toast.success('Employee updated');
     } else {
-      setEmployees(prev => [...prev, { id: `EMP-${Date.now()}`, ...form, salary: +form.salary, status: 'Active' as const }]);
+      setEmployees(prev => [...prev, { id: `EMP-${Date.now()}`, ...form, salary: +form.salary, status: 'Active' as const, department: '' }]);
       toast.success('Employee added');
     }
     setDialogOpen(false);
@@ -59,7 +59,6 @@ const AdminHR = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 space-y-1"><Label>Full Name *</Label><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
               <div className="space-y-1"><Label>Position</Label><Input value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} /></div>
-              <div className="space-y-1"><Label>Department</Label><Input value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} /></div>
               <div className="space-y-1"><Label>Salary</Label><Input type="number" value={form.salary} onChange={e => setForm({ ...form, salary: e.target.value })} /></div>
               <div className="space-y-1"><Label>Phone</Label><Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
               <div className="col-span-2 space-y-1"><Label>Start Date</Label><Input type="date" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} /></div>
@@ -74,7 +73,6 @@ const AdminHR = () => {
               <tr className="border-b border-border">
                 <th className="text-left py-2 px-3 text-muted-foreground font-medium">Employee</th>
                 <th className="text-left py-2 px-3 text-muted-foreground font-medium">Position</th>
-                <th className="text-left py-2 px-3 text-muted-foreground font-medium">Department</th>
                 <th className="text-right py-2 px-3 text-muted-foreground font-medium">Salary</th>
                 <th className="text-left py-2 px-3 text-muted-foreground font-medium">Status</th>
                 <th className="text-right py-2 px-3 text-muted-foreground font-medium">Actions</th>
@@ -87,7 +85,6 @@ const AdminHR = () => {
                     <div><span className="font-medium">{emp.name}</span><br /><span className="text-xs text-muted-foreground">{emp.phone}</span></div>
                   </td>
                   <td className="py-2.5 px-3">{emp.position}</td>
-                  <td className="py-2.5 px-3">{emp.department}</td>
                   <td className="py-2.5 px-3 text-right">₱{emp.salary.toLocaleString()}</td>
                   <td className="py-2.5 px-3">
                     <Badge variant={emp.status === 'Active' ? 'default' : emp.status === 'On Leave' ? 'secondary' : 'destructive'} className="text-xs">
