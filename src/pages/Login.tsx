@@ -38,10 +38,9 @@ const Login = () => {
           <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-8">
             <Store className="w-10 h-10 text-primary-foreground" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4">Vesmenda's Store</h1>
-          <p className="text-lg text-white/60 max-w-md">
-            Complete store management system for inventory, sales, HR, and financial tracking.
-          </p>
+          <h1 className="text-4xl font-bold text-white mb-2">Vesmenda's Store</h1>
+          <p className="text-base text-white/50 mb-4">Management System</p>
+          <p className="text-sm text-white/40">Poblacion Pitogo Zamboanga Del Sur</p>
         </div>
       </div>
 
