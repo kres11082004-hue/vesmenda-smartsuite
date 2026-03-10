@@ -14,6 +14,7 @@ import AdminFinance from "./pages/AdminFinance";
 import AdminReports from "./pages/AdminReports";
 import CashierDashboard from "./pages/CashierDashboard";
 import CashierTransactions from "./pages/CashierTransactions";
+import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             {/* Owner */}
             <Route path="/owner" element={<OwnerDashboard />} />
             <Route path="/owner/sales" element={<AdminSales />} />

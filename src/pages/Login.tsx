@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Store, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,10 +38,9 @@ const Login = () => {
           <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-8">
             <Store className="w-10 h-10 text-primary-foreground" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4">Vesmenda's Store</h1>
-          <p className="text-lg text-white/60 max-w-md">
-            Complete store management system for inventory, sales, HR, and financial tracking.
-          </p>
+          <h1 className="text-4xl font-bold text-white mb-2">Vesmenda's Store</h1>
+          <p className="text-base text-white/50 mb-4">Management System</p>
+          <p className="text-sm text-white/40">Poblacion Pitogo Zamboanga Del Sur</p>
         </div>
       </div>
 
@@ -55,8 +54,8 @@ const Login = () => {
             <h1 className="text-xl font-bold">Vesmenda's Store</h1>
           </div>
 
-          <h2 className="text-2xl font-bold mb-1">Welcome back</h2>
-          <p className="text-muted-foreground mb-8">Sign in to your account</p>
+          <h2 className="text-2xl font-bold mb-1">Welcome</h2>
+          <p className="text-muted-foreground mb-8">Sign in to your account to continue</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
@@ -99,7 +98,12 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-8 p-4 rounded-lg bg-muted">
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-primary hover:underline font-medium">Register</Link>
+          </p>
+
+          <div className="mt-6 p-4 rounded-lg bg-muted">
             <p className="text-xs font-medium text-muted-foreground mb-2">Demo Accounts:</p>
             <div className="space-y-1 text-xs text-muted-foreground">
               <p><span className="font-medium text-foreground">Owner:</span> owner@vesmenda.com</p>

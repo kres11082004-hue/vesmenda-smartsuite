@@ -3,7 +3,8 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { mockProducts, Product } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Pencil, Trash2, Search, AlertTriangle } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, AlertCircle, DollarSign } from 'lucide-react';
+import { StatCard } from '@/components/StatCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -16,6 +17,8 @@ const AdminInventory = () => {
   const [form, setForm] = useState({ name: '', barcode: '', category: '', price: '', cost: '', stock: '', minStock: '' });
 
   const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.category.toLowerCase().includes(search.toLowerCase()));
+  const lowStockCount = products.filter(p => p.stock <= p.minStock).length;
+  const inventoryValue = products.reduce((s, p) => s + p.price * p.stock, 0);
 
   const openAdd = () => { setEditItem(null); setForm({ name: '', barcode: '', category: '', price: '', cost: '', stock: '', minStock: '' }); setDialogOpen(true); };
   const openEdit = (p: Product) => { setEditItem(p); setForm({ name: p.name, barcode: p.barcode, category: p.category, price: p.price.toString(), cost: p.cost.toString(), stock: p.stock.toString(), minStock: p.minStock.toString() }); setDialogOpen(true); };
@@ -44,6 +47,12 @@ const AdminInventory = () => {
             <p className="text-muted-foreground text-sm">Manage your product inventory</p>
           </div>
           <Button onClick={openAdd}><Plus className="w-4 h-4 mr-2" />Add Product</Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard title="Total Products" value={products.length.toString()} icon={Package} />
+          <StatCard title="Low Stock Items" value={lowStockCount.toString()} icon={AlertCircle} changeType={lowStockCount > 0 ? "negative" : "positive"} change={lowStockCount > 0 ? "Needs restocking" : "All stocked"} />
+          <StatCard title="Inventory Value" value={`₱${inventoryValue.toLocaleString()}`} icon={DollarSign} />
         </div>
 
         <div className="relative max-w-sm">
