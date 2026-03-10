@@ -49,6 +49,12 @@ const AdminInventory = () => {
           <Button onClick={openAdd}><Plus className="w-4 h-4 mr-2" />Add Product</Button>
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard title="Total Products" value={products.length.toString()} icon={Package} />
+          <StatCard title="Low Stock Items" value={lowStockCount.toString()} icon={AlertCircle} changeType={lowStockCount > 0 ? "negative" : "positive"} change={lowStockCount > 0 ? "Needs restocking" : "All stocked"} />
+          <StatCard title="Inventory Value" value={`₱${inventoryValue.toLocaleString()}`} icon={DollarSign} />
+        </div>
+
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />

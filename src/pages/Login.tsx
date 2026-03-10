@@ -98,7 +98,12 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-8 p-4 rounded-lg bg-muted">
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-primary hover:underline font-medium">Register</Link>
+          </p>
+
+          <div className="mt-6 p-4 rounded-lg bg-muted">
             <p className="text-xs font-medium text-muted-foreground mb-2">Demo Accounts:</p>
             <div className="space-y-1 text-xs text-muted-foreground">
               <p><span className="font-medium text-foreground">Owner:</span> owner@vesmenda.com</p>
