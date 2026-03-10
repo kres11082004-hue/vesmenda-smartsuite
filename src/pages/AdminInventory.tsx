@@ -17,6 +17,8 @@ const AdminInventory = () => {
   const [form, setForm] = useState({ name: '', barcode: '', category: '', price: '', cost: '', stock: '', minStock: '' });
 
   const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.category.toLowerCase().includes(search.toLowerCase()));
+  const lowStockCount = products.filter(p => p.stock <= p.minStock).length;
+  const inventoryValue = products.reduce((s, p) => s + p.price * p.stock, 0);
 
   const openAdd = () => { setEditItem(null); setForm({ name: '', barcode: '', category: '', price: '', cost: '', stock: '', minStock: '' }); setDialogOpen(true); };
   const openEdit = (p: Product) => { setEditItem(p); setForm({ name: p.name, barcode: p.barcode, category: p.category, price: p.price.toString(), cost: p.cost.toString(), stock: p.stock.toString(), minStock: p.minStock.toString() }); setDialogOpen(true); };
