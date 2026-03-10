@@ -55,8 +55,8 @@ const Login = () => {
             <h1 className="text-xl font-bold">Vesmenda's Store</h1>
           </div>
 
-          <h2 className="text-2xl font-bold mb-1">Welcome back</h2>
-          <p className="text-muted-foreground mb-8">Sign in to your account</p>
+          <h2 className="text-2xl font-bold mb-1">Welcome</h2>
+          <p className="text-muted-foreground mb-8">Sign in to your account to continue</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
