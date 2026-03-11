@@ -26,7 +26,19 @@ const CashierDashboard = () => {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'gcash'>('cash');
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [receiptData, setReceiptData] = useState<{ items: CartItem[]; total: number; paymentMethod: 'cash' | 'gcash'; cashReceived: number; change: number; transactionId: string; date: Date } | null>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
+
+  const handleBarcodeScan = useCallback((code: string) => {
+    const product = mockProducts.find(p => p.barcode === code);
+    if (!product) { toast.error(`Product not found for barcode: ${code}`); return; }
+    setCart(prev => {
+      const existing = prev.find(i => i.product.id === product.id);
+      if (existing) return prev.map(i => i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i);
+      return [...prev, { product, qty: 1 }];
+    });
+    toast.success(`Added: ${product.name}`);
+  }, []);
 
   const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
   const change = +cashReceived - total;
