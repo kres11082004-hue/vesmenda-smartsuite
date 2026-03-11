@@ -29,16 +29,24 @@ const CashierDashboard = () => {
   const [scannerOpen, setScannerOpen] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
 
-  const handleBarcodeScan = useCallback((code: string) => {
-    const product = mockProducts.find(p => p.barcode === code);
-    if (!product) { toast.error(`Product not found for barcode: ${code}`); return; }
+  const addToCart = useCallback((product: Product) => {
     setCart(prev => {
       const existing = prev.find(i => i.product.id === product.id);
+      const currentQty = existing ? existing.qty : 0;
+      if (currentQty >= product.stock) {
+        toast.error(`Out of stock: ${product.name} (only ${product.stock} available)`);
+        return prev;
+      }
       if (existing) return prev.map(i => i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i);
       return [...prev, { product, qty: 1 }];
     });
-    toast.success(`Added: ${product.name}`);
   }, []);
+
+  const handleBarcodeScan = useCallback((code: string) => {
+    const product = mockProducts.find(p => p.barcode === code);
+    if (!product) { toast.error(`Product not found for barcode: ${code}`); return; }
+    addToCart(product);
+  }, [addToCart]);
 
   const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
   const change = +cashReceived - total;
@@ -47,18 +55,21 @@ const CashierDashboard = () => {
     if (!barcode.trim()) return;
     const product = mockProducts.find(p => p.barcode === barcode || p.name.toLowerCase().includes(barcode.toLowerCase()));
     if (!product) { toast.error('Product not found'); setBarcode(''); return; }
-
-    setCart(prev => {
-      const existing = prev.find(i => i.product.id === product.id);
-      if (existing) return prev.map(i => i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, { product, qty: 1 }];
-    });
+    addToCart(product);
     setBarcode('');
     barcodeRef.current?.focus();
   };
 
   const updateQty = (id: string, delta: number) => {
-    setCart(prev => prev.map(i => i.product.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
+    setCart(prev => prev.map(i => {
+      if (i.product.id !== id) return i;
+      const newQty = i.qty + delta;
+      if (newQty > i.product.stock) {
+        toast.error(`Only ${i.product.stock} available for ${i.product.name}`);
+        return i;
+      }
+      return { ...i, qty: Math.max(1, newQty) };
+    }));
   };
 
   const removeItem = (id: string) => setCart(prev => prev.filter(i => i.product.id !== id));
@@ -155,18 +166,15 @@ const CashierDashboard = () => {
               {mockProducts.map(p => (
                 <button
                   key={p.id}
-                  onClick={() => {
-                    setCart(prev => {
-                      const existing = prev.find(i => i.product.id === p.id);
-                      if (existing) return prev.map(i => i.product.id === p.id ? { ...i, qty: i.qty + 1 } : i);
-                      return [...prev, { product: p, qty: 1 }];
-                    });
-                  }}
-                  className="p-3 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-left"
+                  disabled={p.stock <= 0}
+                  onClick={() => addToCart(p)}
+                  className={`p-3 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-left ${p.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <p className="text-xs font-medium truncate">{p.name}</p>
                   <p className="text-sm font-bold text-primary mt-1">₱{p.price}</p>
-                  <p className="text-[10px] text-muted-foreground">Stock: {p.stock}</p>
+                  <p className={`text-[10px] ${p.stock <= p.minStock ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                    {p.stock <= 0 ? 'Out of stock' : `Stock: ${p.stock}`}
+                  </p>
                 </button>
               ))}
             </div>
