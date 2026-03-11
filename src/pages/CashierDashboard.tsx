@@ -42,6 +42,12 @@ const CashierDashboard = () => {
     });
   }, []);
 
+  const handleBarcodeScan = useCallback((code: string) => {
+    const product = mockProducts.find(p => p.barcode === code);
+    if (!product) { toast.error(`Product not found for barcode: ${code}`); return; }
+    addToCart(product);
+  }, [addToCart]);
+
   const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
   const change = +cashReceived - total;
 
@@ -49,18 +55,21 @@ const CashierDashboard = () => {
     if (!barcode.trim()) return;
     const product = mockProducts.find(p => p.barcode === barcode || p.name.toLowerCase().includes(barcode.toLowerCase()));
     if (!product) { toast.error('Product not found'); setBarcode(''); return; }
-
-    setCart(prev => {
-      const existing = prev.find(i => i.product.id === product.id);
-      if (existing) return prev.map(i => i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, { product, qty: 1 }];
-    });
+    addToCart(product);
     setBarcode('');
     barcodeRef.current?.focus();
   };
 
   const updateQty = (id: string, delta: number) => {
-    setCart(prev => prev.map(i => i.product.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
+    setCart(prev => prev.map(i => {
+      if (i.product.id !== id) return i;
+      const newQty = i.qty + delta;
+      if (newQty > i.product.stock) {
+        toast.error(`Only ${i.product.stock} available for ${i.product.name}`);
+        return i;
+      }
+      return { ...i, qty: Math.max(1, newQty) };
+    }));
   };
 
   const removeItem = (id: string) => setCart(prev => prev.filter(i => i.product.id !== id));
