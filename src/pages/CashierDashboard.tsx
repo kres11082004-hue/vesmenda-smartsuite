@@ -176,7 +176,6 @@ const CashierDashboard = () => {
                     {p.stock <= 0 ? 'Out of stock' : `Stock: ${p.stock}`}
                   </p>
                 </button>
-                </button>
               ))}
             </div>
           </div>
