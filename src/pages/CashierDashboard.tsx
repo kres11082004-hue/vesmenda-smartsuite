@@ -321,6 +321,9 @@ const CashierDashboard = () => {
           date={receiptData.date}
         />
       )}
+
+      {/* Camera Barcode Scanner */}
+      <BarcodeScanner open={scannerOpen} onOpenChange={setScannerOpen} onScan={handleBarcodeScan} />
     </DashboardLayout>
   );
 };
