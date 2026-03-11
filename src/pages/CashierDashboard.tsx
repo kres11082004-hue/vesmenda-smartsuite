@@ -29,15 +29,17 @@ const CashierDashboard = () => {
   const [scannerOpen, setScannerOpen] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
 
-  const handleBarcodeScan = useCallback((code: string) => {
-    const product = mockProducts.find(p => p.barcode === code);
-    if (!product) { toast.error(`Product not found for barcode: ${code}`); return; }
+  const addToCart = useCallback((product: Product) => {
     setCart(prev => {
       const existing = prev.find(i => i.product.id === product.id);
+      const currentQty = existing ? existing.qty : 0;
+      if (currentQty >= product.stock) {
+        toast.error(`Out of stock: ${product.name} (only ${product.stock} available)`);
+        return prev;
+      }
       if (existing) return prev.map(i => i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i);
       return [...prev, { product, qty: 1 }];
     });
-    toast.success(`Added: ${product.name}`);
   }, []);
 
   const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
