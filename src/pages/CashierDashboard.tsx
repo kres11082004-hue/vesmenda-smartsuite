@@ -1,12 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { mockProducts, Product } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScanBarcode, Plus, Minus, Trash2, Calculator, X, ShoppingCart, Banknote, Smartphone } from 'lucide-react';
+import { ScanBarcode, Plus, Minus, Trash2, Calculator, Camera, ShoppingCart, Banknote, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ReceiptDialog from '@/components/ReceiptDialog';
+import BarcodeScanner from '@/components/BarcodeScanner';
 
 interface CartItem {
   product: Product;
@@ -25,7 +26,19 @@ const CashierDashboard = () => {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'gcash'>('cash');
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [receiptData, setReceiptData] = useState<{ items: CartItem[]; total: number; paymentMethod: 'cash' | 'gcash'; cashReceived: number; change: number; transactionId: string; date: Date } | null>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
+
+  const handleBarcodeScan = useCallback((code: string) => {
+    const product = mockProducts.find(p => p.barcode === code);
+    if (!product) { toast.error(`Product not found for barcode: ${code}`); return; }
+    setCart(prev => {
+      const existing = prev.find(i => i.product.id === product.id);
+      if (existing) return prev.map(i => i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i);
+      return [...prev, { product, qty: 1 }];
+    });
+    toast.success(`Added: ${product.name}`);
+  }, []);
 
   const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
   const change = +cashReceived - total;
@@ -119,6 +132,9 @@ const CashierDashboard = () => {
               />
             </div>
             <Button onClick={scanProduct} size="lg" className="h-12 px-6">Add</Button>
+            <Button variant="outline" size="icon" className="h-12 w-12" onClick={() => setScannerOpen(true)} title="Scan with camera">
+              <Camera className="w-5 h-5" />
+            </Button>
             <Button variant="outline" size="icon" className="h-12 w-12" onClick={() => setCalcOpen(true)}>
               <Calculator className="w-5 h-5" />
             </Button>
@@ -305,6 +321,9 @@ const CashierDashboard = () => {
           date={receiptData.date}
         />
       )}
+
+      {/* Camera Barcode Scanner */}
+      <BarcodeScanner open={scannerOpen} onOpenChange={setScannerOpen} onScan={handleBarcodeScan} />
     </DashboardLayout>
   );
 };
