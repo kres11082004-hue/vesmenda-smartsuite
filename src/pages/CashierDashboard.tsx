@@ -65,6 +65,14 @@ const CashierDashboard = () => {
 
   const handlePayment = () => {
     if (paymentMethod === 'cash' && +cashReceived < total) { toast.error('Insufficient payment'); return; }
+
+    // Deduct stock from inventory
+    cart.forEach(item => {
+      const product = mockProducts.find(p => p.id === item.product.id);
+      if (product) {
+        product.stock = Math.max(0, product.stock - item.qty);
+      }
+    });
     
     const txnId = 'TXN-' + Date.now().toString(36).toUpperCase();
     const receiptInfo = {
