@@ -132,6 +132,9 @@ const CashierDashboard = () => {
               />
             </div>
             <Button onClick={scanProduct} size="lg" className="h-12 px-6">Add</Button>
+            <Button variant="outline" size="icon" className="h-12 w-12" onClick={() => setScannerOpen(true)} title="Scan with camera">
+              <Camera className="w-5 h-5" />
+            </Button>
             <Button variant="outline" size="icon" className="h-12 w-12" onClick={() => setCalcOpen(true)}>
               <Calculator className="w-5 h-5" />
             </Button>
