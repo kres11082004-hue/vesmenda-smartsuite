@@ -166,18 +166,16 @@ const CashierDashboard = () => {
               {mockProducts.map(p => (
                 <button
                   key={p.id}
-                  onClick={() => {
-                    setCart(prev => {
-                      const existing = prev.find(i => i.product.id === p.id);
-                      if (existing) return prev.map(i => i.product.id === p.id ? { ...i, qty: i.qty + 1 } : i);
-                      return [...prev, { product: p, qty: 1 }];
-                    });
-                  }}
-                  className="p-3 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-left"
+                  disabled={p.stock <= 0}
+                  onClick={() => addToCart(p)}
+                  className={`p-3 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-left ${p.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <p className="text-xs font-medium truncate">{p.name}</p>
                   <p className="text-sm font-bold text-primary mt-1">₱{p.price}</p>
-                  <p className="text-[10px] text-muted-foreground">Stock: {p.stock}</p>
+                  <p className={`text-[10px] ${p.stock <= p.minStock ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                    {p.stock <= 0 ? 'Out of stock' : `Stock: ${p.stock}`}
+                  </p>
+                </button>
                 </button>
               ))}
             </div>
