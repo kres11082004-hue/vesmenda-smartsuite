@@ -1,12 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { mockProducts, Product } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScanBarcode, Plus, Minus, Trash2, Calculator, X, ShoppingCart, Banknote, Smartphone } from 'lucide-react';
+import { ScanBarcode, Plus, Minus, Trash2, Calculator, Camera, ShoppingCart, Banknote, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ReceiptDialog from '@/components/ReceiptDialog';
+import BarcodeScanner from '@/components/BarcodeScanner';
 
 interface CartItem {
   product: Product;
