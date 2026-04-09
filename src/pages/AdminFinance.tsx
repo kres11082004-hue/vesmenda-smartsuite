@@ -3,20 +3,32 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { mockExpenses, mockSales, Expense } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Trash2, Search, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { StatCard } from '@/components/StatCard';
+
+type DetailView = 'revenue' | 'expenses' | 'profit' | null;
 
 const AdminFinance = () => {
   const [expenses, setExpenses] = useState<Expense[]>(mockExpenses);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ date: '', category: '', description: '', amount: '' });
+  const [detailView, setDetailView] = useState<DetailView>(null);
 
   const totalRevenue = mockSales.reduce((s, t) => s + t.total, 0);
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
   const netProfit = totalRevenue - totalExpenses;
+
+  // Group expenses by category
+  const expenseByCategory = expenses.reduce((acc, e) => {
+    const existing = acc.find(c => c.category === e.category);
+    if (existing) { existing.amount += e.amount; existing.count += 1; }
+    else acc.push({ category: e.category, amount: e.amount, count: 1 });
+    return acc;
+  }, [] as { category: string; amount: number; count: number }[]);
 
   const handleAdd = () => {
     if (!form.description || !form.amount) { toast.error('Fill required fields'); return; }
@@ -38,10 +50,102 @@ const AdminFinance = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard title="Total Revenue" value={`₱${totalRevenue.toLocaleString()}`} icon={TrendingUp} changeType="positive" change="From sales" />
-          <StatCard title="Total Expenses" value={`₱${totalExpenses.toLocaleString()}`} icon={TrendingDown} changeType="negative" change="This period" />
-          <StatCard title="Net Profit" value={`₱${netProfit.toLocaleString()}`} icon={DollarSign} changeType={netProfit > 0 ? "positive" : "negative"} change={netProfit > 0 ? "Profitable" : "Loss"} />
+          <StatCard title="Total Revenue" value={`₱${totalRevenue.toLocaleString()}`} icon={TrendingUp} changeType="positive" change="From sales" onClick={() => setDetailView('revenue')} />
+          <StatCard title="Total Expenses" value={`₱${totalExpenses.toLocaleString()}`} icon={TrendingDown} changeType="negative" change="This period" onClick={() => setDetailView('expenses')} />
+          <StatCard title="Net Profit" value={`₱${netProfit.toLocaleString()}`} icon={DollarSign} changeType={netProfit > 0 ? "positive" : "negative"} change={netProfit > 0 ? "Profitable" : "Loss"} onClick={() => setDetailView('profit')} />
         </div>
+
+        {/* Detail: Revenue */}
+        <Dialog open={detailView === 'revenue'} onOpenChange={(o) => !o && setDetailView(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" /> Revenue Breakdown</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="p-3 rounded-lg bg-muted/50">
+                <p className="text-xs text-muted-foreground">Total Revenue</p>
+                <p className="text-xl font-bold">₱{totalRevenue.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground mt-1">{mockSales.length} transactions</p>
+              </div>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">ID</th>
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">Date</th>
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">Items</th>
+                    <th className="text-right py-2 px-2 text-muted-foreground font-medium">Total</th>
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">Payment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockSales.map(sale => (
+                    <tr key={sale.id} className="border-b border-border/50">
+                      <td className="py-2 px-2 font-mono text-xs">{sale.id}</td>
+                      <td className="py-2 px-2 text-xs">{sale.date}</td>
+                      <td className="py-2 px-2 text-xs">{sale.items.map(i => `${i.productName} x${i.qty}`).join(', ')}</td>
+                      <td className="py-2 px-2 text-right font-medium">₱{sale.total.toLocaleString()}</td>
+                      <td className="py-2 px-2"><Badge variant="secondary" className="text-xs">{sale.paymentMethod}</Badge></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Detail: Expenses */}
+        <Dialog open={detailView === 'expenses'} onOpenChange={(o) => !o && setDetailView(null)}>
+          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><TrendingDown className="w-5 h-5 text-destructive" /> Expenses by Category</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="p-3 rounded-lg bg-muted/50">
+                <p className="text-xs text-muted-foreground">Total Expenses</p>
+                <p className="text-xl font-bold">₱{totalExpenses.toLocaleString()}</p>
+              </div>
+              <div className="space-y-2">
+                {expenseByCategory.sort((a, b) => b.amount - a.amount).map(c => (
+                  <div key={c.category} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                    <div>
+                      <p className="text-sm font-medium">{c.category}</p>
+                      <p className="text-xs text-muted-foreground">{c.count} expense{c.count > 1 ? 's' : ''}</p>
+                    </div>
+                    <p className="text-sm font-bold">₱{c.amount.toLocaleString()}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Detail: Profit */}
+        <Dialog open={detailView === 'profit'} onOpenChange={(o) => !o && setDetailView(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-primary" /> Profit Summary</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-success/10 border border-success/20">
+                <p className="text-sm text-muted-foreground">Total Revenue</p>
+                <p className="text-sm font-bold">₱{totalRevenue.toLocaleString()}</p>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                <p className="text-sm text-muted-foreground">Total Expenses</p>
+                <p className="text-sm font-bold">-₱{totalExpenses.toLocaleString()}</p>
+              </div>
+              <div className="border-t border-border pt-3">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10">
+                  <p className="text-sm font-medium">Net Profit</p>
+                  <p className={`text-lg font-bold ${netProfit > 0 ? 'text-success' : 'text-destructive'}`}>₱{netProfit.toLocaleString()}</p>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Profit margin: {((netProfit / totalRevenue) * 100).toFixed(1)}%
+                </p>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
