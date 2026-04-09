@@ -1,13 +1,19 @@
+import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { StatCard } from '@/components/StatCard';
-import { DollarSign, ShoppingCart, Package, Users, TrendingUp, AlertTriangle } from 'lucide-react';
+import { DollarSign, ShoppingCart, Package, Users, TrendingUp, AlertTriangle, X } from 'lucide-react';
 import { monthlySalesData, mockSales, mockProducts, mockEmployees, mockExpenses } from '@/data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
+type DetailView = 'sales' | 'products' | 'lowstock' | 'expenses' | null;
+
 const AdminDashboard = () => {
+  const [detailView, setDetailView] = useState<DetailView>(null);
+
   const totalSales = mockSales.reduce((s, t) => s + t.total, 0);
   const totalExpenses = mockExpenses.reduce((s, e) => s + e.amount, 0);
   const netProfit = totalSales - totalExpenses;
@@ -29,11 +35,156 @@ const AdminDashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Today's Sales" value={`₱${totalSales.toLocaleString()}`} change="+15.3% from last month" changeType="positive" icon={DollarSign} />
-          <StatCard title="Total Products" value={mockProducts.length.toString()} icon={Package} />
-          <StatCard title="Low Stock Items" value={lowStockProducts.length.toString()} changeType={lowStockProducts.length > 0 ? "negative" : "positive"} change={lowStockProducts.length > 0 ? "Needs attention" : "All stocked"} icon={AlertTriangle} />
-          <StatCard title="Monthly Expenses" value={`₱${totalExpenses.toLocaleString()}`} change="3.2% from last month" changeType="neutral" icon={TrendingUp} />
+          <StatCard title="Today's Sales" value={`₱${totalSales.toLocaleString()}`} change="+15.3% from last month" changeType="positive" icon={DollarSign} onClick={() => setDetailView('sales')} />
+          <StatCard title="Total Products" value={mockProducts.length.toString()} icon={Package} onClick={() => setDetailView('products')} />
+          <StatCard title="Low Stock Items" value={lowStockProducts.length.toString()} changeType={lowStockProducts.length > 0 ? "negative" : "positive"} change={lowStockProducts.length > 0 ? "Needs attention" : "All stocked"} icon={AlertTriangle} onClick={() => setDetailView('lowstock')} />
+          <StatCard title="Monthly Expenses" value={`₱${totalExpenses.toLocaleString()}`} change="3.2% from last month" changeType="neutral" icon={TrendingUp} onClick={() => setDetailView('expenses')} />
         </div>
+
+        {/* Detail Dialogs */}
+        <Dialog open={detailView === 'sales'} onOpenChange={(o) => !o && setDetailView(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-primary" /> Today's Sales Breakdown</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground">Total Revenue</p>
+                  <p className="text-xl font-bold">₱{totalSales.toLocaleString()}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground">Transactions</p>
+                  <p className="text-xl font-bold">{mockSales.length}</p>
+                </div>
+              </div>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">ID</th>
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">Date</th>
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">Items</th>
+                    <th className="text-right py-2 px-2 text-muted-foreground font-medium">Total</th>
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">Payment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockSales.map(sale => (
+                    <tr key={sale.id} className="border-b border-border/50">
+                      <td className="py-2 px-2 font-mono text-xs">{sale.id}</td>
+                      <td className="py-2 px-2 text-xs">{sale.date}</td>
+                      <td className="py-2 px-2 text-xs">{sale.items.map(i => `${i.productName} x${i.qty}`).join(', ')}</td>
+                      <td className="py-2 px-2 text-right font-medium">₱{sale.total.toLocaleString()}</td>
+                      <td className="py-2 px-2"><Badge variant="secondary" className="text-xs">{sale.paymentMethod}</Badge></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={detailView === 'products'} onOpenChange={(o) => !o && setDetailView(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Package className="w-5 h-5 text-primary" /> All Products</DialogTitle>
+            </DialogHeader>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 px-2 text-muted-foreground font-medium">Product</th>
+                  <th className="text-left py-2 px-2 text-muted-foreground font-medium">Category</th>
+                  <th className="text-right py-2 px-2 text-muted-foreground font-medium">Price</th>
+                  <th className="text-right py-2 px-2 text-muted-foreground font-medium">Cost</th>
+                  <th className="text-right py-2 px-2 text-muted-foreground font-medium">Stock</th>
+                  <th className="text-left py-2 px-2 text-muted-foreground font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mockProducts.map(p => (
+                  <tr key={p.id} className="border-b border-border/50">
+                    <td className="py-2 px-2 font-medium">{p.name}</td>
+                    <td className="py-2 px-2 text-xs">{p.category}</td>
+                    <td className="py-2 px-2 text-right">₱{p.price}</td>
+                    <td className="py-2 px-2 text-right text-muted-foreground">₱{p.cost}</td>
+                    <td className="py-2 px-2 text-right font-medium">{p.stock}</td>
+                    <td className="py-2 px-2">
+                      <Badge variant={p.stock <= p.minStock ? 'destructive' : 'default'} className="text-xs">
+                        {p.stock <= p.minStock ? 'Low' : 'OK'}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={detailView === 'lowstock'} onOpenChange={(o) => !o && setDetailView(null)}>
+          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-warning" /> Low Stock Items</DialogTitle>
+            </DialogHeader>
+            {lowStockProducts.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">All products are well stocked!</p>
+            ) : (
+              <div className="space-y-2">
+                {lowStockProducts.map(p => (
+                  <div key={p.id} className="flex items-center justify-between p-3 rounded-lg bg-warning/5 border border-warning/20">
+                    <div>
+                      <p className="text-sm font-medium">{p.name}</p>
+                      <p className="text-xs text-muted-foreground">{p.category} • Min: {p.minStock}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-warning">{p.stock} left</p>
+                      <p className="text-xs text-muted-foreground">Need {p.minStock - p.stock + 10} more</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={detailView === 'expenses'} onOpenChange={(o) => !o && setDetailView(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" /> Monthly Expenses</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground">Total Expenses</p>
+                  <p className="text-xl font-bold">₱{totalExpenses.toLocaleString()}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-xs text-muted-foreground">Net Profit</p>
+                  <p className="text-xl font-bold text-success">₱{netProfit.toLocaleString()}</p>
+                </div>
+              </div>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">Date</th>
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">Category</th>
+                    <th className="text-left py-2 px-2 text-muted-foreground font-medium">Description</th>
+                    <th className="text-right py-2 px-2 text-muted-foreground font-medium">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockExpenses.map(e => (
+                    <tr key={e.id} className="border-b border-border/50">
+                      <td className="py-2 px-2 text-xs">{e.date}</td>
+                      <td className="py-2 px-2"><Badge variant="secondary" className="text-xs">{e.category}</Badge></td>
+                      <td className="py-2 px-2 text-xs">{e.description}</td>
+                      <td className="py-2 px-2 text-right font-medium">₱{e.amount.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="stat-card lg:col-span-2">
