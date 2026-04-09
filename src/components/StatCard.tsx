@@ -6,11 +6,15 @@ interface Props {
   change?: string;
   changeType?: 'positive' | 'negative' | 'neutral';
   icon: LucideIcon;
+  onClick?: () => void;
 }
 
-export function StatCard({ title, value, change, changeType = 'neutral', icon: Icon }: Props) {
+export function StatCard({ title, value, change, changeType = 'neutral', icon: Icon, onClick }: Props) {
   return (
-    <div className="stat-card">
+    <div
+      className={`stat-card ${onClick ? 'cursor-pointer hover:ring-2 hover:ring-primary/30 hover:shadow-lg transition-all' : ''}`}
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-muted-foreground">{title}</p>
@@ -25,6 +29,7 @@ export function StatCard({ title, value, change, changeType = 'neutral', icon: I
           <Icon className="w-5 h-5 text-primary" />
         </div>
       </div>
+      {onClick && <p className="text-[10px] text-muted-foreground mt-2">Click to view details</p>}
     </div>
   );
 }
