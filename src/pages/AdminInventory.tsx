@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { mockProducts, Product } from '@/data/mockData';
+import { Product } from '@/data/mockData';
+import { useStore } from '@/contexts/StoreContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, AlertCircle, DollarSign, ScanLine } from 'lucide-react';
