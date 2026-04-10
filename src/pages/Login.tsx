@@ -17,10 +17,10 @@ const Login = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const success = login(email, password);
-    if (success) {
-      const role = email.includes('owner') ? '/owner' : email.includes('admin') ? '/admin' : '/cashier';
-      navigate(role);
+    const foundUser = login(email, password);
+    if (foundUser) {
+      const route = foundUser.role === 'owner' ? '/owner' : foundUser.role === 'admin' ? '/admin' : '/cashier';
+      navigate(route);
     } else {
       setError('Invalid credentials. Try owner@vesmenda.com, admin@vesmenda.com, or cashier@vesmenda.com');
     }
