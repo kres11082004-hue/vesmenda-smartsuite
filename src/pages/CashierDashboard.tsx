@@ -17,6 +17,8 @@ interface CartItem {
 }
 
 const CashierDashboard = () => {
+  const { products, addSale, setProducts } = useStore();
+  const { user } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [barcode, setBarcode] = useState('');
   const [calcOpen, setCalcOpen] = useState(false);
@@ -45,7 +47,7 @@ const CashierDashboard = () => {
   }, []);
 
   const handleBarcodeScan = useCallback((code: string) => {
-    const product = mockProducts.find(p => p.barcode === code);
+    const product = products.find(p => p.barcode === code);
     if (!product) { toast.error(`Product not found for barcode: ${code}`); return; }
     addToCart(product);
   }, [addToCart]);
@@ -55,7 +57,7 @@ const CashierDashboard = () => {
 
   const scanProduct = () => {
     if (!barcode.trim()) return;
-    const product = mockProducts.find(p => p.barcode === barcode || p.name.toLowerCase().includes(barcode.toLowerCase()));
+    const product = products.find(p => p.barcode === barcode || p.name.toLowerCase().includes(barcode.toLowerCase()));
     if (!product) { toast.error('Product not found'); setBarcode(''); return; }
     addToCart(product);
     setBarcode('');
@@ -81,7 +83,7 @@ const CashierDashboard = () => {
 
     // Deduct stock from inventory
     cart.forEach(item => {
-      const product = mockProducts.find(p => p.id === item.product.id);
+      const product = products.find(p => p.id === item.product.id);
       if (product) {
         product.stock = Math.max(0, product.stock - item.qty);
       }
@@ -165,7 +167,7 @@ const CashierDashboard = () => {
           <div className="flex-1 overflow-auto">
             <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wide">Quick Add</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-              {mockProducts.map(p => (
+              {products.map(p => (
                 <button
                   key={p.id}
                   disabled={p.stock <= 0}
