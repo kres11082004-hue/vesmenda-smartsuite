@@ -3,7 +3,7 @@ import { User, UserRole, mockUsers } from '@/data/mockData';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => User | null;
   register: (name: string, email: string, role: UserRole) => boolean;
   logout: () => void;
   isAuthenticated: boolean;
@@ -15,20 +15,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [registeredUsers, setRegisteredUsers] = useState<User[]>(mockUsers);
 
-  const login = (email: string, _password: string) => {
-    const found = registeredUsers.find(u => u.email === email);
-    if (found) {
-      setUser(found);
-      return true;
-    }
-    return false;
+  const login = (email: string, _password: string): User | null => {
+    const found = registeredUsers.find(u => u.email === email) || null;
+    if (found) setUser(found);
+    return found;
   };
 
   const register = (name: string, email: string, role: UserRole) => {
     if (registeredUsers.find(u => u.email === email)) return false;
     const newUser: User = { id: `U-${Date.now()}`, name, email, role };
     setRegisteredUsers(prev => [...prev, newUser]);
-    setUser(newUser);
     return true;
   };
 

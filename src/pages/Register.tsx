@@ -33,9 +33,8 @@ const Register = () => {
 
     const success = register(name, email, selectedRole);
     if (success) {
-      toast.success('Account created successfully!');
-      const route = selectedRole === 'owner' ? '/owner' : selectedRole === 'admin' ? '/admin' : '/cashier';
-      navigate(route);
+      toast.success('Account created! Please sign in with your credentials.');
+      navigate('/');
     } else {
       toast.error('Email already exists');
     }
