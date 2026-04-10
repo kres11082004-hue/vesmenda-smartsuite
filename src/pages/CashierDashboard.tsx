@@ -81,15 +81,27 @@ const CashierDashboard = () => {
   const handlePayment = () => {
     if (paymentMethod === 'cash' && +cashReceived < total) { toast.error('Insufficient payment'); return; }
 
-    // Deduct stock from inventory
-    cart.forEach(item => {
-      const product = products.find(p => p.id === item.product.id);
-      if (product) {
-        product.stock = Math.max(0, product.stock - item.qty);
-      }
-    });
+    // Deduct stock from shared inventory
+    setProducts(prev => prev.map(p => {
+      const cartItem = cart.find(i => i.product.id === p.id);
+      if (cartItem) return { ...p, stock: Math.max(0, p.stock - cartItem.qty) };
+      return p;
+    }));
     
     const txnId = 'TXN-' + Date.now().toString(36).toUpperCase();
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    // Save transaction to shared sales
+    addSale({
+      id: txnId,
+      date: dateStr,
+      items: cart.map(i => ({ productId: i.product.id, productName: i.product.name, qty: i.qty, price: i.product.price })),
+      total,
+      cashier: user?.name || 'Cashier',
+      paymentMethod: paymentMethod === 'cash' ? 'Cash' : 'GCash',
+    });
+
     const receiptInfo = {
       items: [...cart],
       total,
@@ -97,7 +109,7 @@ const CashierDashboard = () => {
       cashReceived: +cashReceived,
       change: paymentMethod === 'cash' ? +cashReceived - total : 0,
       transactionId: txnId,
-      date: new Date(),
+      date: now,
     };
 
     if (paymentMethod === 'gcash') {
