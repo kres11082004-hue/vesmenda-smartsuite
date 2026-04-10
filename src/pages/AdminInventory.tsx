@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 type DetailView = 'products' | 'lowstock' | 'value' | null;
 
 const AdminInventory = () => {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const { products, setProducts } = useStore();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<Product | null>(null);
