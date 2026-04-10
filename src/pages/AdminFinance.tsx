@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { mockExpenses, mockSales, Expense } from '@/data/mockData';
+import { mockExpenses, Expense } from '@/data/mockData';
+import { useStore } from '@/contexts/StoreContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
@@ -13,12 +14,13 @@ import { StatCard } from '@/components/StatCard';
 type DetailView = 'revenue' | 'expenses' | 'profit' | null;
 
 const AdminFinance = () => {
+  const { sales } = useStore();
   const [expenses, setExpenses] = useState<Expense[]>(mockExpenses);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ date: '', category: '', description: '', amount: '' });
   const [detailView, setDetailView] = useState<DetailView>(null);
 
-  const totalRevenue = mockSales.reduce((s, t) => s + t.total, 0);
+  const totalRevenue = sales.reduce((s, t) => s + t.total, 0);
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
   const netProfit = totalRevenue - totalExpenses;
 
@@ -65,7 +67,7 @@ const AdminFinance = () => {
               <div className="p-3 rounded-lg bg-muted/50">
                 <p className="text-xs text-muted-foreground">Total Revenue</p>
                 <p className="text-xl font-bold">₱{totalRevenue.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground mt-1">{mockSales.length} transactions</p>
+                <p className="text-xs text-muted-foreground mt-1">{sales.length} transactions</p>
               </div>
               <table className="w-full text-sm">
                 <thead>
@@ -78,7 +80,7 @@ const AdminFinance = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockSales.map(sale => (
+                  {sales.map(sale => (
                     <tr key={sale.id} className="border-b border-border/50">
                       <td className="py-2 px-2 font-mono text-xs">{sale.id}</td>
                       <td className="py-2 px-2 text-xs">{sale.date}</td>

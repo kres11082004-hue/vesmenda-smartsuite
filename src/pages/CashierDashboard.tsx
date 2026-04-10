@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { mockProducts, Product } from '@/data/mockData';
+import { Product } from '@/data/mockData';
+import { useStore } from '@/contexts/StoreContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScanBarcode, Plus, Minus, Trash2, Calculator, Camera, ShoppingCart, Banknote, Smartphone } from 'lucide-react';
@@ -15,6 +17,8 @@ interface CartItem {
 }
 
 const CashierDashboard = () => {
+  const { products, addSale, setProducts } = useStore();
+  const { user } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [barcode, setBarcode] = useState('');
   const [calcOpen, setCalcOpen] = useState(false);
@@ -43,7 +47,7 @@ const CashierDashboard = () => {
   }, []);
 
   const handleBarcodeScan = useCallback((code: string) => {
-    const product = mockProducts.find(p => p.barcode === code);
+    const product = products.find(p => p.barcode === code);
     if (!product) { toast.error(`Product not found for barcode: ${code}`); return; }
     addToCart(product);
   }, [addToCart]);
@@ -53,7 +57,7 @@ const CashierDashboard = () => {
 
   const scanProduct = () => {
     if (!barcode.trim()) return;
-    const product = mockProducts.find(p => p.barcode === barcode || p.name.toLowerCase().includes(barcode.toLowerCase()));
+    const product = products.find(p => p.barcode === barcode || p.name.toLowerCase().includes(barcode.toLowerCase()));
     if (!product) { toast.error('Product not found'); setBarcode(''); return; }
     addToCart(product);
     setBarcode('');
@@ -77,15 +81,27 @@ const CashierDashboard = () => {
   const handlePayment = () => {
     if (paymentMethod === 'cash' && +cashReceived < total) { toast.error('Insufficient payment'); return; }
 
-    // Deduct stock from inventory
-    cart.forEach(item => {
-      const product = mockProducts.find(p => p.id === item.product.id);
-      if (product) {
-        product.stock = Math.max(0, product.stock - item.qty);
-      }
-    });
+    // Deduct stock from shared inventory
+    setProducts(prev => prev.map(p => {
+      const cartItem = cart.find(i => i.product.id === p.id);
+      if (cartItem) return { ...p, stock: Math.max(0, p.stock - cartItem.qty) };
+      return p;
+    }));
     
     const txnId = 'TXN-' + Date.now().toString(36).toUpperCase();
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    // Save transaction to shared sales
+    addSale({
+      id: txnId,
+      date: dateStr,
+      items: cart.map(i => ({ productId: i.product.id, productName: i.product.name, qty: i.qty, price: i.product.price })),
+      total,
+      cashier: user?.name || 'Cashier',
+      paymentMethod: paymentMethod === 'cash' ? 'Cash' : 'GCash',
+    });
+
     const receiptInfo = {
       items: [...cart],
       total,
@@ -93,7 +109,7 @@ const CashierDashboard = () => {
       cashReceived: +cashReceived,
       change: paymentMethod === 'cash' ? +cashReceived - total : 0,
       transactionId: txnId,
-      date: new Date(),
+      date: now,
     };
 
     if (paymentMethod === 'gcash') {
@@ -163,7 +179,7 @@ const CashierDashboard = () => {
           <div className="flex-1 overflow-auto">
             <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wide">Quick Add</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-              {mockProducts.map(p => (
+              {products.map(p => (
                 <button
                   key={p.id}
                   disabled={p.stock <= 0}

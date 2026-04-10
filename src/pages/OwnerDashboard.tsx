@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { StatCard } from '@/components/StatCard';
 import { DollarSign, ShoppingCart, Package, Users, AlertTriangle } from 'lucide-react';
-import { monthlySalesData, mockSales, mockProducts, mockEmployees, mockExpenses } from '@/data/mockData';
+import { monthlySalesData, mockEmployees, mockExpenses } from '@/data/mockData';
+import { useStore } from '@/contexts/StoreContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,14 +13,15 @@ const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3
 type DetailView = 'sales' | 'products' | 'lowstock' | 'expenses' | null;
 
 const OwnerDashboard = () => {
+  const { products, sales } = useStore();
   const [detailView, setDetailView] = useState<DetailView>(null);
 
-  const totalSales = mockSales.reduce((s, t) => s + t.total, 0);
+  const totalSales = sales.reduce((s, t) => s + t.total, 0);
   const totalExpenses = mockExpenses.reduce((s, e) => s + e.amount, 0);
   const netProfit = totalSales - totalExpenses;
-  const lowStockProducts = mockProducts.filter(p => p.stock <= p.minStock);
+  const lowStockProducts = products.filter(p => p.stock <= p.minStock);
 
-  const categoryData = mockProducts.reduce((acc, p) => {
+  const categoryData = products.reduce((acc, p) => {
     const existing = acc.find(c => c.name === p.category);
     if (existing) existing.value += p.stock;
     else acc.push({ name: p.category, value: p.stock });
@@ -36,7 +38,7 @@ const OwnerDashboard = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard title="Today's Sales" value={`₱${totalSales.toLocaleString()}`} change="+15.3% from last month" changeType="positive" icon={DollarSign} onClick={() => setDetailView('sales')} />
-          <StatCard title="Total Products" value={mockProducts.length.toString()} icon={Package} onClick={() => setDetailView('products')} />
+          <StatCard title="Total Products" value={products.length.toString()} icon={Package} onClick={() => setDetailView('products')} />
           <StatCard title="Low Stock Items" value={lowStockProducts.length.toString()} changeType={lowStockProducts.length > 0 ? "negative" : "positive"} change={lowStockProducts.length > 0 ? "Needs attention" : "All good"} icon={AlertTriangle} onClick={() => setDetailView('lowstock')} />
           <StatCard title="Monthly Expenses" value={`₱${totalExpenses.toLocaleString()}`} change="3.2% from last month" changeType="neutral" icon={DollarSign} onClick={() => setDetailView('expenses')} />
         </div>
@@ -55,7 +57,7 @@ const OwnerDashboard = () => {
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50">
                   <p className="text-xs text-muted-foreground">Transactions</p>
-                  <p className="text-xl font-bold">{mockSales.length}</p>
+                  <p className="text-xl font-bold">{sales.length}</p>
                 </div>
               </div>
               <table className="w-full text-sm">
@@ -69,7 +71,7 @@ const OwnerDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockSales.map(sale => (
+                  {sales.map(sale => (
                     <tr key={sale.id} className="border-b border-border/50">
                       <td className="py-2 px-2 font-mono text-xs">{sale.id}</td>
                       <td className="py-2 px-2 text-xs">{sale.date}</td>
@@ -101,7 +103,7 @@ const OwnerDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {mockProducts.map(p => (
+                {products.map(p => (
                   <tr key={p.id} className="border-b border-border/50">
                     <td className="py-2 px-2 font-medium">{p.name}</td>
                     <td className="py-2 px-2 text-xs">{p.category}</td>
@@ -250,14 +252,14 @@ const OwnerDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {mockSales.slice(0, 5).map(sale => (
+                {sales.slice(0, 5).map(sale => (
                   <tr key={sale.id} className="border-b border-border/50 hover:bg-muted/50">
                     <td className="py-2.5 px-3 font-mono text-xs">{sale.id}</td>
                     <td className="py-2.5 px-3">{sale.items[0]?.productName}</td>
                     <td className="py-2.5 px-3 text-right font-medium">₱{sale.total.toLocaleString()}</td>
                     <td className="py-2.5 px-3">
                       {(() => {
-                        const product = mockProducts.find(p => p.id === sale.items[0]?.productId);
+                        const product = products.find(p => p.id === sale.items[0]?.productId);
                         return product ? `${product.stock} left` : '-';
                       })()}
                     </td>
@@ -268,7 +270,7 @@ const OwnerDashboard = () => {
                     </td>
                     <td className="py-2.5 px-3">
                       {(() => {
-                        const product = mockProducts.find(p => p.id === sale.items[0]?.productId);
+                        const product = products.find(p => p.id === sale.items[0]?.productId);
                         return product?.category || '-';
                       })()}
                     </td>

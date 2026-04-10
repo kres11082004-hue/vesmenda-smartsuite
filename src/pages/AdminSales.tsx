@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { mockSales, SalesTransaction } from '@/data/mockData';
+import { SalesTransaction } from '@/data/mockData';
+import { useStore } from '@/contexts/StoreContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 const AdminSales = () => {
-  const [sales, setSales] = useState<SalesTransaction[]>(mockSales);
+  const { sales, setSales } = useStore();
   const [search, setSearch] = useState('');
   const [editItem, setEditItem] = useState<SalesTransaction | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
