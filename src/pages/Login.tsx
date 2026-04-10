@@ -103,15 +103,6 @@ const Login = () => {
             <Link to="/register" className="text-primary hover:underline font-medium">Register</Link>
           </p>
 
-          <div className="mt-6 p-4 rounded-lg bg-muted">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Demo Accounts:</p>
-            <div className="space-y-1 text-xs text-muted-foreground">
-              <p><span className="font-medium text-foreground">Owner:</span> owner@vesmenda.com</p>
-              <p><span className="font-medium text-foreground">Admin:</span> admin@vesmenda.com</p>
-              <p><span className="font-medium text-foreground">Cashier:</span> cashier@vesmenda.com</p>
-              <p className="text-[10px] mt-1">(Any password works for demo)</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
