@@ -3,7 +3,8 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { mockProducts, Product } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, AlertCircle, DollarSign } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, AlertTriangle, Package, AlertCircle, DollarSign, ScanLine } from 'lucide-react';
+import BarcodeScanner from '@/components/BarcodeScanner';
 import { StatCard } from '@/components/StatCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,7 @@ const AdminInventory = () => {
   const [editItem, setEditItem] = useState<Product | null>(null);
   const [form, setForm] = useState({ name: '', barcode: '', category: '', price: '', cost: '', stock: '', minStock: '' });
   const [detailView, setDetailView] = useState<DetailView>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.category.toLowerCase().includes(search.toLowerCase()));
   const lowStockItems = products.filter(p => p.stock <= p.minStock);
@@ -169,7 +171,15 @@ const AdminInventory = () => {
             <DialogHeader><DialogTitle>{editItem ? 'Edit' : 'Add'} Product</DialogTitle></DialogHeader>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 space-y-1"><Label>Product Name *</Label><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
-              <div className="space-y-1"><Label>Barcode</Label><Input value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} /></div>
+              <div className="col-span-2 space-y-1">
+                <Label>Barcode</Label>
+                <div className="flex gap-2">
+                  <Input value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} placeholder="Enter or scan barcode" />
+                  <Button type="button" variant="outline" size="icon" onClick={() => setScannerOpen(true)} title="Scan barcode">
+                    <ScanLine className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
               <div className="space-y-1"><Label>Category</Label><Input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} /></div>
               <div className="space-y-1"><Label>Price *</Label><Input type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} /></div>
               <div className="space-y-1"><Label>Cost</Label><Input type="number" value={form.cost} onChange={e => setForm({ ...form, cost: e.target.value })} /></div>
@@ -179,6 +189,15 @@ const AdminInventory = () => {
             <Button onClick={handleSave} className="mt-2">Save Product</Button>
           </DialogContent>
         </Dialog>
+
+        <BarcodeScanner
+          open={scannerOpen}
+          onOpenChange={setScannerOpen}
+          onScan={(code) => {
+            setForm(prev => ({ ...prev, barcode: code }));
+            toast.success(`Barcode scanned: ${code}`);
+          }}
+        />
 
         <div className="stat-card overflow-x-auto">
           <table className="w-full text-sm">
