@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { mockProducts, Product } from '@/data/mockData';
-import { Button } from '@/components/ui/button';
+import { Product } from '@/data/mockData';
+import { useStore } from '@/contexts/StoreContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { ScanBarcode, Plus, Minus, Trash2, Calculator, Camera, ShoppingCart, Banknote, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { mockExpenses, mockSales, Expense } from '@/data/mockData';
+import { mockExpenses, Expense } from '@/data/mockData';
+import { useStore } from '@/contexts/StoreContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';

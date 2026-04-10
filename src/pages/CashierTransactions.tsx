@@ -1,7 +1,8 @@
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { mockSales } from '@/data/mockData';
+import { useStore } from '@/contexts/StoreContext';
 
 const CashierTransactions = () => {
+  const { sales } = useStore();
   return (
     <DashboardLayout allowedRoles={['cashier']}>
       <div className="space-y-6">
@@ -21,7 +22,7 @@ const CashierTransactions = () => {
               </tr>
             </thead>
             <tbody>
-              {mockSales.map(sale => (
+              {sales.map(sale => (
                 <tr key={sale.id} className="border-b border-border/50 hover:bg-muted/50">
                   <td className="py-2.5 px-3 font-mono text-xs">{sale.id}</td>
                   <td className="py-2.5 px-3">{sale.date}</td>
