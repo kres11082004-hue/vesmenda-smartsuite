@@ -1,10 +1,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Printer, X } from 'lucide-react';
+import { Printer, X, Store } from 'lucide-react';
 import { useRef } from 'react';
 import { Product } from '@/data/mockData';
 
-interface CartItem {
+export interface CartItem {
   product: Product;
   qty: number;
   unit: {
@@ -198,8 +198,5 @@ const ReceiptDialog = ({ open, onOpenChange, items, total, paymentMethod, cashRe
     </Dialog>
   );
 };
-
-// Import missing icon
-import { Store } from 'lucide-react';
 
 export default ReceiptDialog;

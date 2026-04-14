@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { StatCard } from '@/components/StatCard';
-import { PhilippinePeso, ShoppingCart, Package, Users, TrendingUp, AlertTriangle, X } from 'lucide-react';
-import { monthlySalesData, mockEmployees, mockExpenses } from '@/data/mockData';
+import { PhilippinePeso, ShoppingCart, Package, Users, TrendingUp, AlertTriangle } from 'lucide-react';
+import { monthlySalesData, mockExpenses, SalesTransaction } from '@/data/mockData';
 import { useStore } from '@/contexts/StoreContext';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import ReceiptDialog from '@/components/ReceiptDialog';
+import ReceiptDialog, { CartItem } from '@/components/ReceiptDialog';
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
@@ -19,16 +19,28 @@ const AdminDashboard = () => {
 
   // Receipt reprint state
   const [receiptOpen, setReceiptOpen] = useState(false);
-  const [receiptData, setReceiptData] = useState<any>(null);
+  const [receiptData, setReceiptData] = useState<{
+    items: CartItem[];
+    total: number;
+    paymentMethod: 'cash' | 'gcash';
+    cashReceived: number;
+    change: number;
+    transactionId: string;
+    date: Date;
+  } | null>(null);
 
-  const handleRowClick = (sale: any) => {
+  const handleRowClick = (sale: SalesTransaction) => {
     setReceiptData({
-      items: sale.items.map((i: any) => ({
-        product: products.find((p: any) => p.id === i.productId) || { name: i.productName, price: i.price },
-        qty: i.qty,
-      })),
+      items: sale.items.map((i) => {
+        const product = products.find((p) => p.id === i.productId);
+        return {
+          product: (product || { name: i.productName, price: i.price }) as unknown as CartItem['product'],
+          qty: i.qty,
+          unit: product?.units?.[0] || { id: 'u1', name: 'Piece', price: i.price, conversionRate: 1 }
+        };
+      }),
       total: sale.total,
-      paymentMethod: sale.paymentMethod.toLowerCase(),
+      paymentMethod: sale.paymentMethod.toLowerCase() === 'gcash' ? 'gcash' : 'cash',
       cashReceived: sale.total,
       change: 0,
       transactionId: sale.id,

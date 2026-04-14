@@ -15,8 +15,8 @@ export default defineConfig(({ mode }) => ({
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
-        configure: (proxy, options) => {
-          proxy.on('error', (err, req, res) => {
+        configure: (proxy, _options) => {
+          proxy.on('error', (_err, _req, _res) => {
             // Silence proxy errors when backend is offline
           });
         },

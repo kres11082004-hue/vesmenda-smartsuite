@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Store, Eye, EyeOff, UserPlus, Camera } from 'lucide-react';
+import { UserPlus, Camera, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -69,13 +69,11 @@ const Register = () => {
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed"
         style={{ backgroundImage: "url('/store-bg.jpg')" }}
       />
-      <div className="absolute inset-0 z-0 bg-black/60" />
-
-      {/* Background Watermark for Brand Identity */}
+      <div className="absolute inset-0 z-0 bg-black/60 backdrop-blur-[2px]" />
 
       {/* Header Titles - Sharp & High Contrast */}
       <div className="relative z-10 text-center mb-10 mt-4 md:mt-0">
-        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-3 tracking-tight drop-shadow-[0_4px_10px_rgba(124,58,237,0.5)] text-sharp leading-tight">
+        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-3 tracking-tight drop-shadow-[0_4px_10px_rgba(124,58,237,0.5)] leading-tight">
           Vesmenda's Store Management System
         </h1>
         <p className="text-xl md:text-2xl text-violet-200 font-semibold tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
@@ -84,7 +82,7 @@ const Register = () => {
       </div>
 
       {/* Centered Register Card */}
-      <div className="relative z-10 w-full max-w-[900px] bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/20 flex flex-col md:flex-row overflow-hidden">
+      <div className="relative z-10 w-full max-w-[900px] bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20 flex flex-col md:flex-row overflow-hidden">
         {/* Left Side: Branding & Avatar */}
         <div className="w-full md:w-1/3 bg-gray-50/80 p-8 md:p-10 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-200">
           <div className="relative w-32 h-32 mx-auto mb-6 group">
@@ -128,18 +126,18 @@ const Register = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 text-left">
                 <Label htmlFor="name" className="text-gray-700 font-medium ml-1">Full Name</Label>
-                <Input id="name" placeholder="Enter your full name" value={name} onChange={e => setName(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors" required />
+                <Input id="name" placeholder="Enter your full name" value={name} onChange={e => setName(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all" required />
               </div>
               <div className="space-y-2 text-left">
                 <Label htmlFor="reg-email" className="text-gray-700 font-medium ml-1">Email</Label>
-                <Input id="reg-email" type="email" placeholder="you@vesmenda.com" value={email} onChange={e => setEmail(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors" required />
+                <Input id="reg-email" type="email" placeholder="you@vesmenda.com" value={email} onChange={e => setEmail(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all" required />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 text-left">
                 <Label htmlFor="phone" className="text-gray-700 font-medium ml-1">Phone Number</Label>
-                <Input id="phone" type="tel" placeholder="09XXXXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors" required />
+                <Input id="phone" type="tel" placeholder="09XXXXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all" required />
               </div>
               <div className="space-y-2 text-left">
                 <Label htmlFor="birthdate" className="text-gray-700 font-medium ml-1">Birthdate</Label>
@@ -158,7 +156,7 @@ const Register = () => {
                     }
                     setBirthdate(val);
                   }} 
-                  className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors" 
+                  className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all" 
                   required 
                 />
               </div>
@@ -166,14 +164,14 @@ const Register = () => {
 
             <div className="space-y-2 text-left">
               <Label htmlFor="address" className="text-gray-700 font-medium ml-1">Complete Address</Label>
-              <Input id="address" placeholder="House No., Street, Brgy, City, Province" value={address} onChange={e => setAddress(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors" required />
+              <Input id="address" placeholder="House No., Street, Brgy, City, Province" value={address} onChange={e => setAddress(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all" required />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 text-left">
                 <Label htmlFor="reg-password" className="text-gray-700 font-medium ml-1">Password</Label>
                 <div className="relative">
-                  <Input id="reg-password" type={showPassword ? 'text' : 'password'} placeholder="Create password" value={password} onChange={e => setPassword(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors pr-10" required />
+                  <Input id="reg-password" type={showPassword ? 'text' : 'password'} placeholder="Create password" value={password} onChange={e => setPassword(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all pr-10" required />
                   <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-100 transition-colors" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -182,7 +180,7 @@ const Register = () => {
 
               <div className="space-y-2 text-left">
                 <Label htmlFor="confirm-password" className="text-gray-700 font-medium ml-1">Confirm</Label>
-                <Input id="confirm-password" type={showPassword ? 'text' : 'password'} placeholder="Confirm password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors" required />
+                <Input id="confirm-password" type={showPassword ? 'text' : 'password'} placeholder="Confirm password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all" required />
               </div>
             </div>
 

@@ -44,7 +44,7 @@ const AdminHR = () => {
   const payrollPrintRef = useRef<HTMLDivElement>(null);
 
   // Individual Payslip State
-  const [selectedPayslip, setSelectedPayslip] = useState<{ emp: any, date: string, ref: string } | null>(null);
+  const [selectedPayslip, setSelectedPayslip] = useState<{ emp: { name: string; position: string; salary: number }; date: string, ref: string } | null>(null);
   const [payslipOpen, setPayslipOpen] = useState(false);
 
   const filtered = employees.filter(e => e.name.toLowerCase().includes(search.toLowerCase()));
@@ -67,7 +67,7 @@ const AdminHR = () => {
       setEmployees(prev => prev.map(e => e.id === editItem.id ? { ...e, ...form, salary: +form.salary } : e));
       toast.success('Employee updated');
     } else {
-      setEmployees(prev => [...prev, { id: `EMP-${Date.now()}`, ...form, salary: +form.salary, status: 'Active' as const }]);
+      setEmployees(prev => [...prev, { id: `EMP-${Date.now()}`, ...form, salary: +form.salary, status: 'Active' as const, department: '' }]);
       toast.success('Employee added');
     }
     setDialogOpen(false);
@@ -141,7 +141,7 @@ const AdminHR = () => {
     printWindow.print();
   };
 
-  const openPayslip = (emp: any, date: string, ref: string) => {
+  const openPayslip = (emp: { name: string; position: string; salary: number }, date: string, ref: string) => {
     setSelectedPayslip({ emp, date, ref });
     setPayslipOpen(true);
   };

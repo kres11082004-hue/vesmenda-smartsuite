@@ -26,36 +26,36 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-      <SyncProvider>
-      <StoreProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            {/* Owner */}
-            <Route path="/owner" element={<OwnerDashboard />} />
-            <Route path="/owner/sales" element={<AdminSales />} />
-            <Route path="/owner/inventory" element={<AdminInventory />} />
-            <Route path="/owner/hr" element={<AdminHR />} />
-            <Route path="/owner/finance" element={<AdminFinance />} />
-            <Route path="/owner/monitoring" element={<AdminMonitoring />} />
-            {/* Admin */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/sales" element={<AdminSales />} />
-            <Route path="/admin/inventory" element={<AdminInventory />} />
-            <Route path="/admin/hr" element={<AdminHR />} />
-            <Route path="/admin/finance" element={<AdminFinance />} />
-            <Route path="/admin/reports" element={<AdminReports />} />
-            {/* Cashier */}
-            <Route path="/cashier" element={<CashierDashboard />} />
-            <Route path="/cashier/transactions" element={<CashierTransactions />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </StoreProvider>
-      </SyncProvider>
+        <SyncProvider>
+          <StoreProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                {/* Owner */}
+                <Route path="/owner" element={<OwnerDashboard />} />
+                <Route path="/owner/sales" element={<AdminSales />} />
+                <Route path="/owner/inventory" element={<AdminInventory />} />
+                <Route path="/owner/hr" element={<AdminHR />} />
+                <Route path="/owner/finance" element={<AdminFinance />} />
+                <Route path="/owner/monitoring" element={<AdminMonitoring />} />
+                {/* Admin */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/sales" element={<AdminSales />} />
+                <Route path="/admin/inventory" element={<AdminInventory />} />
+                <Route path="/admin/hr" element={<AdminHR />} />
+                <Route path="/admin/finance" element={<AdminFinance />} />
+                <Route path="/admin/reports" element={<AdminReports />} />
+                {/* Cashier */}
+                <Route path="/cashier" element={<CashierDashboard />} />
+                <Route path="/cashier/transactions" element={<CashierTransactions />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </StoreProvider>
+        </SyncProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

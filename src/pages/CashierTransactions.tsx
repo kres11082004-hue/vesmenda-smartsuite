@@ -1,22 +1,35 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useStore } from '@/contexts/StoreContext';
-import ReceiptDialog from '@/components/ReceiptDialog';
+import ReceiptDialog, { CartItem } from '@/components/ReceiptDialog';
 import { Receipt } from 'lucide-react';
+import { SalesTransaction } from '@/data/mockData';
 
 const CashierTransactions = () => {
   const { sales, products } = useStore();
   const [receiptOpen, setReceiptOpen] = useState(false);
-  const [receiptData, setReceiptData] = useState<any>(null);
+  const [receiptData, setReceiptData] = useState<{
+    items: CartItem[];
+    total: number;
+    paymentMethod: 'cash' | 'gcash';
+    cashReceived: number;
+    change: number;
+    transactionId: string;
+    date: Date;
+  } | null>(null);
 
-  const handleRowClick = (sale: any) => {
+  const handleRowClick = (sale: SalesTransaction) => {
     setReceiptData({
-      items: sale.items.map((i: any) => ({
-        product: products.find((p) => p.id === i.productId) || { name: i.productName, price: i.price },
-        qty: i.qty,
-      })),
+      items: sale.items.map((i) => {
+        const product = products.find((p) => p.id === i.productId);
+        return {
+          product: (product || { name: i.productName, price: i.price }) as unknown as CartItem['product'],
+          qty: i.qty,
+          unit: product?.units?.[0] || { id: 'u1', name: 'Piece', price: i.price, conversionRate: 1 }
+        };
+      }),
       total: sale.total,
-      paymentMethod: sale.paymentMethod.toLowerCase(),
+      paymentMethod: sale.paymentMethod.toLowerCase() === 'gcash' ? 'gcash' : 'cash',
       cashReceived: sale.total,
       change: 0,
       transactionId: sale.id,
@@ -57,7 +70,7 @@ const CashierTransactions = () => {
                 >
                   <td className="py-2.5 px-3 font-mono text-xs">{sale.id}</td>
                   <td className="py-2.5 px-3 text-xs">{sale.date}</td>
-                  <td className="py-2.5 px-3 text-xs">{sale.items.map((i: any) => `${i.productName} x${i.qty}`).join(', ')}</td>
+                  <td className="py-2.5 px-3 text-xs">{sale.items.map((i) => `${i.productName} x${i.qty}`).join(', ')}</td>
                   <td className="py-2.5 px-3">
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary uppercase tracking-wider">
                       {sale.paymentMethod}

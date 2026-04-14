@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Store } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,19 +27,17 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen relative flex flex-col items-center justify-center p-4 overflow-hidden">
       {/* Full-screen Background with Blur and Dark Overlay */}
       <div 
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat scale-105"
         style={{ backgroundImage: "url('/store-bg.jpg')" }}
       />
-      <div className="absolute inset-0 z-0 bg-black/60" />
+      <div className="absolute inset-0 z-0 bg-black/60 backdrop-blur-[2px]" />
       
-      {/* Background Watermark for Brand Identity */}
-
       {/* Header Titles - Sharp & High Contrast */}
       <div className="relative z-10 text-center mb-10 mt-[-5vh]">
-        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-3 tracking-tight drop-shadow-[0_4px_10px_rgba(124,58,237,0.5)] text-sharp">
+        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-3 tracking-tight drop-shadow-[0_4px_10px_rgba(124,58,237,0.5)]">
           Vesmenda's Store Management System
         </h1>
         <p className="text-xl md:text-2xl text-violet-200 font-semibold tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
@@ -48,7 +46,7 @@ const Login = () => {
       </div>
 
       {/* Centered Login Card */}
-      <div className="relative z-10 w-full max-w-[420px] bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-8 md:p-10 border border-white/20">
+      <div className="relative z-10 w-full max-w-[420px] bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-8 md:p-10 border border-white/20">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome</h2>
           <p className="text-gray-500 text-sm">Sign in to your account to continue</p>
@@ -63,7 +61,7 @@ const Login = () => {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-12 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+              className="h-12 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all"
               required
             />
           </div>
@@ -77,7 +75,7 @@ const Login = () => {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-12 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors pr-12"
+                className="h-12 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all pr-12"
                 required
               />
               <button

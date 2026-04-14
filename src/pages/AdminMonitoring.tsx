@@ -59,7 +59,7 @@ const AdminMonitoring = () => {
     }
   };
 
-  const handleActivityClick = (log: any) => {
+  const handleActivityClick = (log: { action: string, userId: string, [key: string]: unknown }) => {
     if (log.action === 'Sale Completed') {
       navigate('/owner/sales');
     } else if (log.action.includes('Product')) {

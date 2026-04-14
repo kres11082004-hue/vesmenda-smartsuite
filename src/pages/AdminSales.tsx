@@ -9,7 +9,7 @@ import { Plus, Pencil, Trash2, Search, Minus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import ReceiptDialog from '@/components/ReceiptDialog';
+import ReceiptDialog, { CartItem } from '@/components/ReceiptDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AdminSales = () => {
@@ -25,9 +25,15 @@ const AdminSales = () => {
 
   // Receipt State
   const [receiptOpen, setReceiptOpen] = useState(false);
-  const [receiptData, setReceiptData] = useState<any>(null);
-
-
+  const [receiptData, setReceiptData] = useState<{
+    items: CartItem[];
+    total: number;
+    paymentMethod: 'cash' | 'gcash';
+    cashReceived: number;
+    change: number;
+    transactionId: string;
+    date: Date;
+  } | null>(null);
 
   const filtered = sales.filter(s => s.id.toLowerCase().includes(search.toLowerCase()) || s.cashier.toLowerCase().includes(search.toLowerCase()));
 
@@ -79,12 +85,16 @@ const AdminSales = () => {
 
   const handleRowClick = (sale: SalesTransaction) => {
     setReceiptData({
-      items: sale.items.map(i => ({
-        product: products.find(p => p.id === i.productId) || { name: i.productName, price: i.price },
-        qty: i.qty
-      })),
+      items: sale.items.map(i => {
+        const product = products.find(p => p.id === i.productId);
+        return {
+          product: (product || { name: i.productName, price: i.price }) as unknown as CartItem['product'],
+          qty: i.qty,
+          unit: product?.units?.[0] || { id: 'u1', name: 'Piece', price: i.price, conversionRate: 1 }
+        };
+      }),
       total: sale.total,
-      paymentMethod: sale.paymentMethod.toLowerCase(),
+      paymentMethod: sale.paymentMethod.toLowerCase() === 'gcash' ? 'gcash' : 'cash',
       cashReceived: sale.total, // Assume exact
       change: 0,
       transactionId: sale.id,
@@ -180,7 +190,7 @@ const AdminSales = () => {
                 <th className="text-left py-2 px-3">Items</th>
                 <th className="text-left py-2 px-3">Payment</th>
                 <th className="text-right py-2 px-3">Total</th>
-                {user?.role !== 'owner' && <th className="text-right py-2 px-3">Actions</th>}
+                {(user?.role === 'admin' || user?.role === 'owner') && <th className="text-right py-2 px-3">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -218,8 +228,6 @@ const AdminSales = () => {
             </tbody>
           </table>
         </div>
-
-
       </div>
 
       {receiptData && (

@@ -29,7 +29,7 @@ const AdminInventory = () => {
     cost: '', 
     stock: '', 
     minStock: '',
-    units: [] as any[]
+    units: [] as { id: string; name: string; conversionRate: number; price: number; cost: number; isBase: boolean; }[]
   });
   const [detailView, setDetailView] = useState<DetailView>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -86,7 +86,7 @@ const AdminInventory = () => {
     }));
   };
 
-  const updateUnitForm = (id: string, field: string, value: any) => {
+  const updateUnitForm = (id: string, field: string, value: string | number) => {
     setForm(prev => ({
       ...prev,
       units: prev.units.map(u => {

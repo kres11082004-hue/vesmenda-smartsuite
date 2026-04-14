@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { Product, SalesTransaction, GeneratedReport, Employee, Expense, mockProducts, mockSales, mockReports, mockEmployees, mockExpenses } from '@/data/mockData';
 import { useSync } from './SyncContext';
 
@@ -27,31 +27,31 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<Product[]>(() => {
     const saved = localStorage.getItem('smartsuite_products');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
+    if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return mockProducts;
   });
 
   const [sales, setSales] = useState<SalesTransaction[]>(() => {
     const saved = localStorage.getItem('smartsuite_sales');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
+    if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return mockSales;
   });
 
   const [reports, setReports] = useState<GeneratedReport[]>(() => {
     const saved = localStorage.getItem('smartsuite_reports');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
+    if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return mockReports;
   });
 
   const [employees, setEmployees] = useState<Employee[]>(() => {
     const saved = localStorage.getItem('smartsuite_employees');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
+    if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return mockEmployees;
   });
 
   const [expenses, setExpenses] = useState<Expense[]>(() => {
     const saved = localStorage.getItem('smartsuite_expenses');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
+    if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return mockExpenses;
   });
 
@@ -84,11 +84,11 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   // Listen for changes from other tabs
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'smartsuite_products' && e.newValue) { try { setProducts(JSON.parse(e.newValue)); } catch (err) {} }
-      if (e.key === 'smartsuite_sales' && e.newValue) { try { setSales(JSON.parse(e.newValue)); } catch (err) {} }
-      if (e.key === 'smartsuite_reports' && e.newValue) { try { setReports(JSON.parse(e.newValue)); } catch (err) {} }
-      if (e.key === 'smartsuite_employees' && e.newValue) { try { setEmployees(JSON.parse(e.newValue)); } catch (err) {} }
-      if (e.key === 'smartsuite_expenses' && e.newValue) { try { setExpenses(JSON.parse(e.newValue)); } catch (err) {} }
+      if (e.key === 'smartsuite_products' && e.newValue) { try { setProducts(JSON.parse(e.newValue)); } catch (err) { console.error(err); } }
+      if (e.key === 'smartsuite_sales' && e.newValue) { try { setSales(JSON.parse(e.newValue)); } catch (err) { console.error(err); } }
+      if (e.key === 'smartsuite_reports' && e.newValue) { try { setReports(JSON.parse(e.newValue)); } catch (err) { console.error(err); } }
+      if (e.key === 'smartsuite_employees' && e.newValue) { try { setEmployees(JSON.parse(e.newValue)); } catch (err) { console.error(err); } }
+      if (e.key === 'smartsuite_expenses' && e.newValue) { try { setExpenses(JSON.parse(e.newValue)); } catch (err) { console.error(err); } }
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);

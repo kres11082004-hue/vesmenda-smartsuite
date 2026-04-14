@@ -6,14 +6,14 @@ export type SyncStatus = 'online' | 'offline' | 'syncing' | 'error';
 export interface SyncOperation {
   id: string;
   type: string;
-  payload: any;
+  payload: unknown;
   timestamp: number;
 }
 
 interface SyncContextType {
   status: SyncStatus;
   queueLength: number;
-  enqueue: (type: string, payload: any) => void;
+  enqueue: (type: string, payload: unknown) => void;
   forceSync: () => Promise<void>;
 }
 
@@ -24,7 +24,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [queue, setQueue] = useState<SyncOperation[]>(() => {
     const saved = localStorage.getItem('smartsuite_sync_queue');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
+    if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return [];
   });
 
@@ -54,7 +54,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('smartsuite_sync_queue', JSON.stringify(queue));
   }, [queue]);
 
-  const enqueue = useCallback((type: string, payload: any) => {
+  const enqueue = useCallback((type: string, payload: unknown) => {
     const op: SyncOperation = { id: `OP-${Date.now()}-${Math.floor(Math.random()*1000)}`, type, payload, timestamp: Date.now() };
     setQueue(prev => [...prev, op]);
   }, []);

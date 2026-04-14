@@ -16,7 +16,17 @@ import BarcodeScanner from '@/components/BarcodeScanner';
 interface CartItem {
   product: Product;
   qty: number;
-  unit: any; // ProductUnit
+  unit: ProductUnit;
+}
+
+interface ReceiptData {
+  items: CartItem[];
+  total: number;
+  paymentMethod: 'cash' | 'gcash';
+  cashReceived: number;
+  change: number;
+  transactionId: string;
+  date: Date;
 }
 
 const CashierDashboard = () => {
@@ -37,11 +47,11 @@ const CashierDashboard = () => {
   const [cashReceived, setCashReceived] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'gcash'>('cash');
   const [receiptOpen, setReceiptOpen] = useState(false);
-  const [receiptData, setReceiptData] = useState<{ items: CartItem[]; total: number; paymentMethod: 'cash' | 'gcash'; cashReceived: number; change: number; transactionId: string; date: Date } | null>(null);
+  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
   const barcodeRef = useRef<HTMLInputElement>(null);
 
-  const addToCartWithUnit = (product: Product, unit: any) => {
+  const addToCartWithUnit = (product: Product, unit: ProductUnit) => {
     setCart(prev => {
       // Check if item with SAME unit already exists
       const existing = prev.find(i => i.product.id === product.id && i.unit.id === unit.id);
@@ -166,7 +176,7 @@ const CashierDashboard = () => {
       date: now,
     };
 
-    setReceiptData(receiptInfo as any);
+    setReceiptData(receiptInfo);
     toast.success('Sale Completed');
     logActivity('Sale Completed', `Processed sale of ₱${total.toLocaleString()}`);
     setCart([]);
@@ -339,29 +349,64 @@ const CashierDashboard = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium">Payment Method</label>
               <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => setPaymentMethod('cash')} className={`flex items-center gap-3 p-4 rounded-lg border-2 ${paymentMethod === 'cash' ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                  <Banknote className="w-6 h-6" /><span className="font-semibold">Cash</span>
+                <button
+                  onClick={() => setPaymentMethod('cash')}
+                  className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${paymentMethod === 'cash' ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/30'}`}
+                >
+                  <Banknote className={`w-6 h-6 ${paymentMethod === 'cash' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <div className="text-left">
+                    <p className={`font-semibold text-sm ${paymentMethod === 'cash' ? 'text-primary' : ''}`}>Cash</p>
+                    <p className="text-[10px] text-muted-foreground">Physical payment</p>
+                  </div>
                 </button>
-                <button onClick={() => setPaymentMethod('gcash')} className={`flex items-center gap-3 p-4 rounded-lg border-2 ${paymentMethod === 'gcash' ? 'border-blue-500 bg-blue-50' : 'border-border'}`}>
-                  <Smartphone className="w-6 h-6" /><span className="font-semibold">GCash</span>
+                <button
+                  onClick={() => setPaymentMethod('gcash')}
+                  className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${paymentMethod === 'gcash' ? 'border-[hsl(210,100%,50%)] bg-[hsl(210,100%,50%)]/5' : 'border-border hover:border-muted-foreground/30'}`}
+                >
+                  <Smartphone className={`w-6 h-6 ${paymentMethod === 'gcash' ? 'text-[hsl(210,100%,50%)]' : 'text-muted-foreground'}`} />
+                  <div className="text-left">
+                    <p className={`font-semibold text-sm ${paymentMethod === 'gcash' ? 'text-[hsl(210,100%,50%)]' : ''}`}>GCash</p>
+                    <p className="text-[10px] text-muted-foreground">Mobile payment</p>
+                  </div>
                 </button>
               </div>
             </div>
 
             {paymentMethod === 'cash' && (
-              <div className="space-y-2">
-                <Label>Cash Received</Label>
-                <Input type="number" value={cashReceived} onChange={e => setCashReceived(e.target.value)} className="h-12 text-lg" />
-                {+cashReceived > 0 && <div className="flex justify-between py-2 border-t"><span>Change:</span><span className="font-bold">₱{(+cashReceived - total).toLocaleString()}</span></div>}
+              <>
+                <div className="space-y-2">
+                  <Label>Cash Received</Label>
+                  <Input type="number" value={cashReceived} onChange={e => setCashReceived(e.target.value)} placeholder="Enter amount" className="h-12 text-lg" autoFocus />
+                </div>
+                {+cashReceived > 0 && (
+                  <div className="p-3 rounded-lg bg-muted flex justify-between">
+                    <span>Change</span>
+                    <span className={`font-bold ${change >= 0 ? 'text-success' : 'text-destructive'}`}>₱{change.toLocaleString()}</span>
+                  </div>
+                )}
+              </>
+            )}
+
+            {paymentMethod === 'gcash' && (
+              <div className="p-4 rounded-lg border border-border bg-muted/50 text-center space-y-1">
+                <Smartphone className="w-8 h-8 mx-auto text-[hsl(210,100%,50%)]" />
+                <p className="text-sm font-medium">Scan QR or confirm GCash payment</p>
+                <p className="text-xs text-muted-foreground">Amount: ₱{total.toLocaleString()}</p>
               </div>
             )}
 
-            <Button className="w-full h-12 font-bold bg-primary" onClick={handlePayment} disabled={paymentMethod === 'cash' && (!cashReceived || +cashReceived < total)}>Complete Transaction</Button>
+            <Button
+              className="w-full h-12 font-bold bg-primary"
+              onClick={handlePayment}
+              disabled={paymentMethod === 'cash' ? (!cashReceived || +cashReceived < total) : cart.length === 0}
+            >
+              {paymentMethod === 'cash' ? 'Complete Cash Payment' : 'Confirm GCash Payment'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* ... (Existing Calculator & Receipt Dialogs) ... */}
+      {/* Calculator Dialog */}
       <Dialog open={calcOpen} onOpenChange={setCalcOpen}>
         <DialogContent className="max-w-xs">
           <DialogHeader><DialogTitle>Calculator</DialogTitle></DialogHeader>
@@ -371,14 +416,36 @@ const CashierDashboard = () => {
           </div>
           <div className="grid grid-cols-4 gap-2">
             {['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+'].map(btn => (
-              <Button key={btn} variant="outline" className="h-12 text-lg" onClick={() => calcPress(btn)}>{btn}</Button>
+              <Button
+                key={btn}
+                variant={['+','-','×','÷'].includes(btn) ? 'secondary' : btn === '=' ? 'default' : 'outline'}
+                className="h-12 text-lg"
+                onClick={() => calcPress(btn)}
+              >
+                {btn}
+              </Button>
             ))}
             <Button variant="destructive" className="col-span-4 h-10" onClick={() => calcPress('C')}>Clear</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {receiptData && <ReceiptDialog open={receiptOpen} onOpenChange={setReceiptOpen} {...(receiptData as any)} />}
+      {/* Receipt Dialog */}
+      {receiptData && (
+        <ReceiptDialog
+          open={receiptOpen}
+          onOpenChange={setReceiptOpen}
+          items={receiptData.items}
+          total={receiptData.total}
+          paymentMethod={receiptData.paymentMethod}
+          cashReceived={receiptData.cashReceived}
+          change={receiptData.change}
+          transactionId={receiptData.transactionId}
+          date={receiptData.date}
+        />
+      )}
+
+      {/* Camera Barcode Scanner */}
       <BarcodeScanner open={scannerOpen} onOpenChange={setScannerOpen} onScan={handleBarcodeScan} />
     </DashboardLayout>
   );

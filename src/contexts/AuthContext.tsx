@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, UserRole, mockUsers, ActivityLog } from '@/data/mockData';
 
 interface AuthContextType {
@@ -21,19 +21,19 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('smartsuite_currentUser');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
+    if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return null;
   });
 
   const [registeredUsers, setRegisteredUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('smartsuite_users');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
+    if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return mockUsers;
   });
 
   const [activities, setActivities] = useState<ActivityLog[]>(() => {
     const saved = localStorage.getItem('smartsuite_activities');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
+    if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return [];
   });
 
@@ -58,13 +58,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'smartsuite_currentUser') {
-        try { setUser(e.newValue ? JSON.parse(e.newValue) : null); } catch(err) {}
+        try { setUser(e.newValue ? JSON.parse(e.newValue) : null); } catch(err) { console.error(err); }
       }
       if (e.key === 'smartsuite_users' && e.newValue) {
-        try { setRegisteredUsers(JSON.parse(e.newValue)); } catch(err) {}
+        try { setRegisteredUsers(JSON.parse(e.newValue)); } catch(err) { console.error(err); }
       }
       if (e.key === 'smartsuite_activities' && e.newValue) {
-        try { setActivities(JSON.parse(e.newValue)); } catch(err) {}
+        try { setActivities(JSON.parse(e.newValue)); } catch(err) { console.error(err); }
       }
     };
     window.addEventListener('storage', handleStorageChange);
