@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { Product } from '@/data/mockData';
+import { Product, ProductUnit } from '@/data/mockData';
 import { useStore } from '@/contexts/StoreContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
