@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User, UserRole, mockUsers, ActivityLog } from '@/data/mockData';
+import { useSync } from './SyncContext';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   user: User | null;
@@ -19,6 +21,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const sync = useSync();
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('smartsuite_currentUser');
     if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
@@ -36,6 +39,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return [];
   });
+
+  // Initial Fetch from server
+  useEffect(() => {
+    const fetchInitialAuthData = async () => {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      try {
+        const [usersRes, activityRes] = await Promise.all([
+          fetch(`${apiUrl}/api/users`),
+          fetch(`${apiUrl}/api/activities`)
+        ]);
+
+        if (usersRes.ok) {
+          const cloudUsers = await usersRes.json();
+          if (cloudUsers.length > 0) setRegisteredUsers(cloudUsers);
+        }
+        if (activityRes.ok) {
+          const cloudActivities = await activityRes.json();
+          if (cloudActivities.length > 0) setActivities(cloudActivities);
+        }
+      } catch (e) {
+        console.warn('Backend unreachable, using local auth data');
+      }
+    };
+    fetchInitialAuthData();
+  }, []);
 
   // Sync to local storage
   useEffect(() => {
@@ -80,7 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return found;
   };
 
-  const logActivityInternal = (u: User | null, action: string, details: string) => {
+  const logActivityInternal = useCallback((u: User | null, action: string, details: string) => {
     if (!u) return;
     const newLog: ActivityLog = {
       id: `L-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
@@ -91,8 +119,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       details,
       timestamp: new Date().toISOString()
     };
-    setActivities(prev => [...prev, newLog]);
-  };
+    setActivities(prev => [newLog, ...prev].slice(0, 500));
+    sync.enqueue('LOG_ACTIVITY', newLog);
+  }, [sync]);
 
   const logActivity = (action: string, details: string) => {
     logActivityInternal(user, action, details);
@@ -104,7 +133,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = (name: string, email: string, role: UserRole, details?: { phone?: string, birthdate?: string, address?: string, avatar?: string }) => {
-    if (registeredUsers.find(u => u.email === email)) return false;
+    if (registeredUsers.find(u => u.email === email)) {
+      toast.error('Email already registered');
+      return false;
+    }
     const newUser: User = { 
       id: `U-${Date.now()}`, 
       name, 
@@ -113,6 +145,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       ...details
     };
     setRegisteredUsers(prev => [...prev, newUser]);
+    sync.enqueue('ADD_USER', newUser);
     logActivityInternal(newUser, 'Registration', `New ${role} account created`);
     return true;
   };
@@ -129,12 +162,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(updatedUser);
     
     setRegisteredUsers(prev => prev.map(u => u.id === user.id ? updatedUser : u));
+    sync.enqueue('UPDATE_USER', { id: user.id, updates: data });
     logActivityInternal(updatedUser, 'Profile Update', `Updated: ${Object.keys(data).join(', ')}`);
   };
 
   const deleteUser = (userId: string) => {
     if (user?.id === userId) return; // Cannot delete self
     setRegisteredUsers(prev => prev.filter(u => u.id !== userId));
+    sync.enqueue('DELETE_USER', { id: userId });
   };
 
   const resetAuthData = () => {

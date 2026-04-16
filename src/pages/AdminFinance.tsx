@@ -16,7 +16,7 @@ type DetailView = 'revenue' | 'expenses' | 'profit' | null;
 
 const AdminFinance = () => {
   const { user } = useAuth();
-  const { sales, expenses, setExpenses } = useStore();
+  const { sales, expenses, addExpense, deleteExpense } = useStore();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ date: '', category: '', description: '', amount: '' });
   const [detailView, setDetailView] = useState<DetailView>(null);
@@ -35,7 +35,7 @@ const AdminFinance = () => {
 
   const handleAdd = () => {
     if (!form.description || !form.amount) { toast.error('Fill required fields'); return; }
-    setExpenses(prev => [...prev, { id: `EXP-${Date.now()}`, date: form.date || new Date().toISOString().split('T')[0], category: form.category, description: form.description, amount: +form.amount }]);
+    addExpense({ id: `EXP-${Date.now()}`, date: form.date || new Date().toISOString().split('T')[0], category: form.category, description: form.description, amount: +form.amount });
     toast.success('Expense added');
     setDialogOpen(false);
     setForm({ date: '', category: '', description: '', amount: '' });
@@ -192,7 +192,7 @@ const AdminFinance = () => {
                   <td className="py-2.5 px-3 text-right font-medium">₱{exp.amount.toLocaleString()}</td>
                   {user?.role !== 'owner' && (
                     <td className="py-2.5 px-3 text-right">
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => { setExpenses(prev => prev.filter(e => e.id !== exp.id)); toast.success('Deleted'); }}><Trash2 className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => { deleteExpense(exp.id); toast.success('Deleted'); }}><Trash2 className="w-3.5 h-3.5" /></Button>
                     </td>
                   )}
                 </tr>

@@ -22,7 +22,7 @@ interface PayrollRecord {
 
 const AdminHR = () => {
   const { user } = useAuth();
-  const { employees, setEmployees } = useStore();
+  const { employees, addEmployee, updateEmployee, deleteEmployee } = useStore();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<Employee | null>(null);
@@ -64,17 +64,17 @@ const AdminHR = () => {
   const handleSave = () => {
     if (!form.name) { toast.error('Name is required'); return; }
     if (editItem) {
-      setEmployees(prev => prev.map(e => e.id === editItem.id ? { ...e, ...form, salary: +form.salary } : e));
+      updateEmployee(editItem.id, { ...form, salary: +form.salary });
       toast.success('Employee updated');
     } else {
-      setEmployees(prev => [...prev, { id: `EMP-${Date.now()}`, ...form, salary: +form.salary, status: 'Active' as const, department: '' }]);
+      addEmployee({ id: `EMP-${Date.now()}`, ...form, salary: +form.salary, status: 'Active' as const });
       toast.success('Employee added');
     }
     setDialogOpen(false);
     setForm({ name: '', position: '', salary: '', phone: '', birthdate: '', address: '', photo: '' });
   };
 
-  const handleDelete = (id: string) => { setEmployees(prev => prev.filter(e => e.id !== id)); toast.success('Employee removed'); };
+  const handleDelete = (id: string) => { deleteEmployee(id); toast.success('Employee removed'); };
 
   const totalPayroll = activeEmployees.reduce((s, e) => s + e.salary, 0);
 

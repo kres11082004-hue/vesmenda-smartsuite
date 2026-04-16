@@ -17,7 +17,12 @@ interface StoreContextType {
   deleteSale: (id: string) => void;
   setSales: React.Dispatch<React.SetStateAction<SalesTransaction[]>>;
   addReport: (report: GeneratedReport) => void;
+  addEmployee: (employee: Employee) => void;
+  updateEmployee: (id: string, updates: Partial<Employee>) => void;
+  deleteEmployee: (id: string) => void;
   setEmployees: React.Dispatch<React.SetStateAction<Employee[]>>;
+  addExpense: (expense: Expense) => void;
+  deleteExpense: (id: string) => void;
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
   resetStoreData: () => void;
 }
@@ -54,6 +59,31 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
     return mockExpenses;
   });
+
+  // Initial Fetch from server
+  useEffect(() => {
+    const fetchInitialStoreData = async () => {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      try {
+        const [prodRes, salesRes, empRes, expRes, repRes] = await Promise.all([
+          fetch(`${apiUrl}/api/products`),
+          fetch(`${apiUrl}/api/sales`),
+          fetch(`${apiUrl}/api/employees`),
+          fetch(`${apiUrl}/api/expenses`),
+          fetch(`${apiUrl}/api/reports`)
+        ]);
+
+        if (prodRes.ok) { const data = await prodRes.json(); if (data.length > 0) setProducts(data); }
+        if (salesRes.ok) { const data = await salesRes.json(); if (data.length > 0) setSales(data); }
+        if (empRes.ok) { const data = await empRes.json(); if (data.length > 0) setEmployees(data); }
+        if (expRes.ok) { const data = await expRes.json(); if (data.length > 0) setExpenses(data); }
+        if (repRes.ok) { const data = await repRes.json(); if (data.length > 0) setReports(data); }
+      } catch (e) {
+        console.warn('Backend unreachable, using local store data');
+      }
+    };
+    fetchInitialStoreData();
+  }, []);
 
   // Sync and Migrate
   useEffect(() => { 
@@ -162,6 +192,31 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     sync.enqueue('ADD_REPORT', report);
   }, [sync]);
 
+  const addEmployee = useCallback((employee: Employee) => {
+    setEmployees(prev => [...prev, employee]);
+    sync.enqueue('ADD_EMPLOYEE', employee);
+  }, [sync]);
+
+  const updateEmployee = useCallback((id: string, updates: Partial<Employee>) => {
+    setEmployees(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
+    sync.enqueue('UPDATE_EMPLOYEE', { id, updates });
+  }, [sync]);
+
+  const deleteEmployee = useCallback((id: string) => {
+    setEmployees(prev => prev.filter(e => e.id !== id));
+    sync.enqueue('DELETE_EMPLOYEE', { id });
+  }, [sync]);
+
+  const addExpense = useCallback((expense: Expense) => {
+    setExpenses(prev => [...prev, expense]);
+    sync.enqueue('ADD_EXPENSE', expense);
+  }, [sync]);
+
+  const deleteExpense = useCallback((id: string) => {
+    setExpenses(prev => prev.filter(e => e.id !== id));
+    sync.enqueue('DELETE_EXPENSE', { id });
+  }, [sync]);
+
   const resetStoreData = useCallback(() => {
     setProducts([]);
     setSales([]);
@@ -175,7 +230,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       products, sales, reports, employees, expenses,
       addProduct, updateProduct, deleteProduct, setProducts,
       addSale, updateSale, deleteSale, setSales, addReport,
-      setEmployees, setExpenses, resetStoreData
+      addEmployee, updateEmployee, deleteEmployee, setEmployees,
+      addExpense, deleteExpense, setExpenses, resetStoreData
     }}>
       {children}
     </StoreContext.Provider>
