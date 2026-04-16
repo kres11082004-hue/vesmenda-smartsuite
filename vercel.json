@@ -3,8 +3,8 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/(api.*)",
-      "destination": "https://vesmenda-store.onrender.com/$1"
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
     },
     {
       "source": "/(.*)",
