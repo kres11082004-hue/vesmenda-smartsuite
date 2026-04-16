@@ -7,7 +7,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Global error handler for database connection
+// 1. Health Check (Always reachable)
+app.get(['/api/health', '/health'], (req, res) => res.json({ status: 'ok', source: 'vercel-functions' }));
+
+// 2. Debug Endpoint (Shows real DB errors)
+app.get(['/api/debug', '/debug'], async (req, res) => {
+    try {
+        await pool.query('SELECT 1');
+        res.json({ status: 'connected', database: 'neon' });
+    } catch (err) {
+        res.status(500).json({ 
+            status: 'error', 
+            message: err.message,
+            code: err.code,
+            hint: 'Check your DATABASE_URL in Vercel. Make sure no spaces or extra characters.'
+        });
+    }
+});
+
+// 3. Database connection protection middleware for other routes
 app.use(async (req, res, next) => {
     try {
         await pool.query('SELECT 1');
@@ -16,14 +34,10 @@ app.use(async (req, res, next) => {
         console.error('Database connection error:', err.message);
         res.status(503).json({ 
             error: 'Database connection failed', 
-            details: err.message,
-            hint: 'Check your DATABASE_URL in Vercel settings' 
+            details: err.message
         });
     }
 });
-
-// Healthy Check
-app.get(['/api/health', '/health'], (req, res) => res.json({ status: 'ok', source: 'vercel-functions' }));
 
 // Users
 app.get('/api/users', async (req, res) => {
