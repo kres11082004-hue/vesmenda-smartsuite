@@ -40,7 +40,7 @@ app.use(async (req, res, next) => {
 });
 
 // Users
-app.get('/api/users', async (req, res) => {
+app.get(['/api/users', '/users'], async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM users');
         res.json(result.rows);
@@ -51,7 +51,7 @@ app.get('/api/users', async (req, res) => {
 });
 
 // Products with units
-app.get('/api/products', async (req, res) => {
+app.get(['/api/products', '/products'], async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT p.*, 
@@ -91,7 +91,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 // Sales
-app.get('/api/sales', async (req, res) => {
+app.get(['/api/sales', '/sales'], async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT s.*, 
@@ -123,7 +123,7 @@ app.get('/api/sales', async (req, res) => {
 });
 
 // Employees
-app.get('/api/employees', async (req, res) => {
+app.get(['/api/employees', '/employees'], async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM employees ORDER BY name ASC');
         res.json(result.rows.map(e => ({
@@ -138,7 +138,7 @@ app.get('/api/employees', async (req, res) => {
 });
 
 // Expenses
-app.get('/api/expenses', async (req, res) => {
+app.get(['/api/expenses', '/expenses'], async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM expenses ORDER BY date DESC');
         res.json(result.rows.map(e => ({ ...e, amount: parseFloat(e.amount) })));
@@ -149,7 +149,7 @@ app.get('/api/expenses', async (req, res) => {
 });
 
 // Reports
-app.get('/api/reports', async (req, res) => {
+app.get(['/api/reports', '/reports'], async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM generated_reports ORDER BY generated_at DESC');
         res.json(result.rows.map(r => ({
@@ -164,7 +164,7 @@ app.get('/api/reports', async (req, res) => {
 });
 
 // Activities
-app.get('/api/activities', async (req, res) => {
+app.get(['/api/activities', '/activities'], async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT 200');
         res.json(result.rows.map(a => ({
@@ -180,7 +180,7 @@ app.get('/api/activities', async (req, res) => {
 });
 
 // Sync Endpoint
-app.post('/api/sync', async (req, res) => {
+app.post(['/api/sync', '/sync'], async (req, res) => {
     const { operations } = req.body;
     if (!operations || !Array.isArray(operations)) {
         return res.status(400).json({ error: 'Invalid operations format' });
