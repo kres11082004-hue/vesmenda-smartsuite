@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/(api.*)",
-      "destination": "https://vesmenda-smartsuite-api.onrender.com/$1"
+      "destination": "https://vesmenda-store.onrender.com/$1"
     },
     {
       "source": "/(.*)",

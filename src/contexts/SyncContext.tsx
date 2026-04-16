@@ -119,6 +119,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
   let status: SyncStatus = isOnline ? 'online' : 'offline';
   if (isSyncing) status = 'syncing';
+  else if (isOnline && serverUnreachable) status = 'error';
   else if (isOnline && queue.length > 0) status = 'offline'; // Pending state
 
   return (
