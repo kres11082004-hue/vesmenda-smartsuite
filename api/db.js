@@ -7,17 +7,21 @@ dotenv.config();
 let pool;
 
 if (process.env.DATABASE_URL) {
+  // Production / Unified Dev
   pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.DATABASE_URL.split('?')[0] + '?sslmode=require',
     ssl: {
       rejectUnauthorized: false
     }
   });
 } else {
-  console.error('FATAL ERROR: DATABASE_URL is missing from environment variables.');
-  // Fallback to avoid crashing the whole process but health check will report it
+  // Local Fallback (Only used if no cloud URL is set)
   pool = new Pool({
-    connectionString: 'postgresql://invalid:invalid@localhost/invalid',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || 'Vesmenda_db',
   });
 }
 
