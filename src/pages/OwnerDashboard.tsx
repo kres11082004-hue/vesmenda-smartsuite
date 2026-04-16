@@ -8,7 +8,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ReceiptDialog, { CartItem } from '@/components/ReceiptDialog';
+import ReportDialog from '@/components/ReportDialog';
 import { Button } from '@/components/ui/button';
+import { GeneratedReport } from '@/data/mockData';
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
@@ -18,6 +20,9 @@ const OwnerDashboard = () => {
   const { products, sales, reports } = useStore();
   const otherReports = reports.filter(r => r.title !== 'Sales Report');
   const [detailView, setDetailView] = useState<DetailView>(null);
+  
+  // Report Dialog State
+  const [selectedReport, setSelectedReport] = useState<GeneratedReport | null>(null);
 
   // Reprint State
   const [receiptOpen, setReceiptOpen] = useState(false);
@@ -302,7 +307,12 @@ const OwnerDashboard = () => {
                     </div>
                     <FileText className="w-8 h-8 text-primary/20" />
                   </div>
-                  <Button variant="outline" size="sm" className="w-full text-[10px] h-8 mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full text-[10px] h-8 mt-2"
+                    onClick={() => setSelectedReport(report)}
+                  >
                     <Printer className="w-3 h-3 mr-2" /> View & Print Detailed PDF
                   </Button>
                 </div>
@@ -324,6 +334,14 @@ const OwnerDashboard = () => {
           change={receiptData.change}
           transactionId={receiptData.transactionId}
           date={receiptData.date}
+        />
+      )}
+
+      {selectedReport && (
+        <ReportDialog 
+          open={!!selectedReport}
+          onOpenChange={(open) => !open && setSelectedReport(null)}
+          report={selectedReport}
         />
       )}
     </DashboardLayout>
