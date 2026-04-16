@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { User, UserRole, mockUsers, ActivityLog } from '@/data/mockData';
+import { User, UserRole, ActivityLog } from '@/data/mockData';
 import { useSync } from './SyncContext';
 import { toast } from 'sonner';
 
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [registeredUsers, setRegisteredUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('smartsuite_users');
     if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
-    return mockUsers;
+    return [];
   });
 
   const [activities, setActivities] = useState<ActivityLog[]>(() => {
@@ -52,11 +52,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (usersRes.ok) {
           const cloudUsers = await usersRes.json();
-          if (cloudUsers.length > 0) setRegisteredUsers(cloudUsers);
+          // Backend is the source of truth if we are online and fetch succeeds
+          setRegisteredUsers(cloudUsers);
         }
         if (activityRes.ok) {
           const cloudActivities = await activityRes.json();
-          if (cloudActivities.length > 0) setActivities(cloudActivities);
+          setActivities(cloudActivities);
         }
       } catch (e) {
         console.warn('Backend unreachable, using local auth data');

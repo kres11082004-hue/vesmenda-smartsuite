@@ -25,9 +25,12 @@ const AdminMonitoring = () => {
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const navigate = useNavigate();
 
-  // Filter activities
+  // Filter activities - Exclude owner actions from monitoring
   const filteredActivities = activities
     .filter(a => {
+      // Don't show owner activities in the monitoring feed
+      if (a.userRole === 'owner') return false;
+
       const matchesSearch = 
         a.userName.toLowerCase().includes(searchTerm.toLowerCase()) || 
         a.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,13 +41,15 @@ const AdminMonitoring = () => {
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   // Stats
-  // onlineUsers logic can be refined, but for now we use activity logs
-  const userList = registeredUsers.map(u => {
-    const userActivities = activities.filter(a => a.userId === u.id);
-    const lastActivity = userActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
-    const isOnline = lastActivity?.action === 'Login'; // Simple mock logic
-    return { ...u, lastActivity, isOnline };
-  });
+  // Exclude owners from the status list
+  const userList = registeredUsers
+    .filter(u => u.role !== 'owner')
+    .map(u => {
+      const userActivities = activities.filter(a => a.userId === u.id);
+      const lastActivity = userActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+      const isOnline = lastActivity?.action === 'Login'; // Simple mock logic
+      return { ...u, lastActivity, isOnline };
+    });
 
   const getActionIcon = (action: string) => {
     switch (action) {
@@ -93,17 +98,17 @@ const AdminMonitoring = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatCard 
-            title="Total Registered Users" 
-            value={registeredUsers.length.toString()} 
+            title="Monitored Staff" 
+            value={userList.length.toString()} 
             icon={Users} 
-            change="All staff roles"
+            change="Staff & Cashiers"
             changeType="neutral"
           />
           <StatCard 
-            title="Total Recorded Logs" 
-            value={activities.length.toString()} 
+            title="Staff Activity Logs" 
+            value={filteredActivities.length.toString()} 
             icon={Activity} 
-            change="Rolling buffer (200)"
+            change="Excludes Owner"
             changeType="neutral"
           />
           <StatCard 

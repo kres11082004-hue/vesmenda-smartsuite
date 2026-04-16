@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import { Product, SalesTransaction, GeneratedReport, Employee, Expense, mockProducts, mockSales, mockReports, mockEmployees, mockExpenses } from '@/data/mockData';
+import { Product, SalesTransaction, GeneratedReport, Employee, Expense } from '@/data/mockData';
 import { useSync } from './SyncContext';
 
 interface StoreContextType {
@@ -33,31 +33,31 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<Product[]>(() => {
     const saved = localStorage.getItem('smartsuite_products');
     if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
-    return mockProducts;
+    return [];
   });
 
   const [sales, setSales] = useState<SalesTransaction[]>(() => {
     const saved = localStorage.getItem('smartsuite_sales');
     if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
-    return mockSales;
+    return [];
   });
 
   const [reports, setReports] = useState<GeneratedReport[]>(() => {
     const saved = localStorage.getItem('smartsuite_reports');
     if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
-    return mockReports;
+    return [];
   });
 
   const [employees, setEmployees] = useState<Employee[]>(() => {
     const saved = localStorage.getItem('smartsuite_employees');
     if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
-    return mockEmployees;
+    return [];
   });
 
   const [expenses, setExpenses] = useState<Expense[]>(() => {
     const saved = localStorage.getItem('smartsuite_expenses');
     if (saved) { try { return JSON.parse(saved); } catch (e) { console.error(e); } }
-    return mockExpenses;
+    return [];
   });
 
   // Initial Fetch from server
@@ -73,11 +73,11 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
           fetch(`${apiUrl}/api/reports`)
         ]);
 
-        if (prodRes.ok) { const data = await prodRes.json(); if (data.length > 0) setProducts(data); }
-        if (salesRes.ok) { const data = await salesRes.json(); if (data.length > 0) setSales(data); }
-        if (empRes.ok) { const data = await empRes.json(); if (data.length > 0) setEmployees(data); }
-        if (expRes.ok) { const data = await expRes.json(); if (data.length > 0) setExpenses(data); }
-        if (repRes.ok) { const data = await repRes.json(); if (data.length > 0) setReports(data); }
+        if (prodRes.ok) setProducts(await prodRes.json());
+        if (salesRes.ok) setSales(await salesRes.json());
+        if (empRes.ok) setEmployees(await empRes.json());
+        if (expRes.ok) setExpenses(await expRes.json());
+        if (repRes.ok) setReports(await repRes.json());
       } catch (e) {
         console.warn('Backend unreachable, using local store data');
       }

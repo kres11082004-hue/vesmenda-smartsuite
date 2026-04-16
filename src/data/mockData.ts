@@ -21,11 +21,7 @@ export interface ActivityLog {
   timestamp: string;
 }
 
-export const mockUsers: User[] = [
-  { id: '1', name: 'Vesmenda', email: 'owner@vesmenda.com', role: 'owner' },
-  { id: '2', name: 'Maria Santos', email: 'admin@vesmenda.com', role: 'admin' },
-  { id: '3', name: 'Juan Dela Cruz', email: 'cashier@vesmenda.com', role: 'cashier' },
-];
+export const mockUsers: User[] = [];
 
 export interface ProductUnit {
   id: string;
@@ -96,3 +92,4 @@ export interface GeneratedReport {
 }
 
 export const mockReports: GeneratedReport[] = [];
+
