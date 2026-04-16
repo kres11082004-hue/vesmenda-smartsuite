@@ -18,6 +18,7 @@ import CashierDashboard from "./pages/CashierDashboard";
 import CashierTransactions from "./pages/CashierTransactions";
 import Register from "./pages/Register";
 import AdminMonitoring from "./pages/AdminMonitoring";
+import NotFound from "./pages/NotFound";
 import { RealTimeSync } from "@/components/RealTimeSync";
 
 const queryClient = new QueryClient();
