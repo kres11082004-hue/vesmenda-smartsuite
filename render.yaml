@@ -16,22 +16,3 @@ services:
         value: 20
       - key: CI
         value: false
-
-  # Frontend Static Site
-  - type: static
-    name: vesmenda-smartsuite
-    env: static
-    buildCommand: npm ci && npm run build
-    publishPath: dist
-    envVars:
-      - key: VITE_API_URL
-        fromService:
-          type: web
-          name: vesmenda-smartsuite-api
-          property: host
-      - key: NODE_VERSION
-        value: 20
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html

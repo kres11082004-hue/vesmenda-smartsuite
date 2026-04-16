@@ -25,6 +25,7 @@ interface StoreContextType {
   deleteExpense: (id: string) => void;
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
   resetStoreData: () => void;
+  refreshStoreData: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -60,30 +61,31 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     return [];
   });
 
+  const refreshStoreData = useCallback(async () => {
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    try {
+      const [prodRes, salesRes, empRes, expRes, repRes] = await Promise.all([
+        fetch(`${apiUrl}/api/products`),
+        fetch(`${apiUrl}/api/sales`),
+        fetch(`${apiUrl}/api/employees`),
+        fetch(`${apiUrl}/api/expenses`),
+        fetch(`${apiUrl}/api/reports`)
+      ]);
+
+      if (prodRes.ok) setProducts(await prodRes.json());
+      if (salesRes.ok) setSales(await salesRes.json());
+      if (empRes.ok) setEmployees(await empRes.json());
+      if (expRes.ok) setExpenses(await expRes.json());
+      if (repRes.ok) setReports(await repRes.json());
+    } catch (e) {
+      console.warn('Background store sync failed');
+    }
+  }, []);
+
   // Initial Fetch from server
   useEffect(() => {
-    const fetchInitialStoreData = async () => {
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      try {
-        const [prodRes, salesRes, empRes, expRes, repRes] = await Promise.all([
-          fetch(`${apiUrl}/api/products`),
-          fetch(`${apiUrl}/api/sales`),
-          fetch(`${apiUrl}/api/employees`),
-          fetch(`${apiUrl}/api/expenses`),
-          fetch(`${apiUrl}/api/reports`)
-        ]);
-
-        if (prodRes.ok) setProducts(await prodRes.json());
-        if (salesRes.ok) setSales(await salesRes.json());
-        if (empRes.ok) setEmployees(await empRes.json());
-        if (expRes.ok) setExpenses(await expRes.json());
-        if (repRes.ok) setReports(await repRes.json());
-      } catch (e) {
-        console.warn('Backend unreachable, using local store data');
-      }
-    };
-    fetchInitialStoreData();
-  }, []);
+    refreshStoreData();
+  }, [refreshStoreData]);
 
   // Sync and Migrate
   useEffect(() => { 
@@ -231,7 +233,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       addProduct, updateProduct, deleteProduct, setProducts,
       addSale, updateSale, deleteSale, setSales, addReport,
       addEmployee, updateEmployee, deleteEmployee, setEmployees,
-      addExpense, deleteExpense, setExpenses, resetStoreData
+      addExpense, deleteExpense, setExpenses, resetStoreData, refreshStoreData
     }}>
       {children}
     </StoreContext.Provider>

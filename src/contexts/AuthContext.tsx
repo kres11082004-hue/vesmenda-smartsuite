@@ -15,6 +15,7 @@ interface AuthContextType {
   clearActivities: () => void;
   deleteUser: (userId: string) => void;
   resetAuthData: () => void;
+  refreshAuthData: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -40,31 +41,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return [];
   });
 
+  const refreshAuthData = useCallback(async () => {
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    try {
+      const [usersRes, activityRes] = await Promise.all([
+        fetch(`${apiUrl}/api/users`),
+        fetch(`${apiUrl}/api/activities`)
+      ]);
+
+      if (usersRes.ok) {
+        setRegisteredUsers(await usersRes.json());
+      }
+      if (activityRes.ok) {
+        setActivities(await activityRes.json());
+      }
+    } catch (e) {
+      console.warn('Background sync failed');
+    }
+  }, []);
+
   // Initial Fetch from server
   useEffect(() => {
-    const fetchInitialAuthData = async () => {
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      try {
-        const [usersRes, activityRes] = await Promise.all([
-          fetch(`${apiUrl}/api/users`),
-          fetch(`${apiUrl}/api/activities`)
-        ]);
-
-        if (usersRes.ok) {
-          const cloudUsers = await usersRes.json();
-          // Backend is the source of truth if we are online and fetch succeeds
-          setRegisteredUsers(cloudUsers);
-        }
-        if (activityRes.ok) {
-          const cloudActivities = await activityRes.json();
-          setActivities(cloudActivities);
-        }
-      } catch (e) {
-        console.warn('Backend unreachable, using local auth data');
-      }
-    };
-    fetchInitialAuthData();
-  }, []);
+    refreshAuthData();
+  }, [refreshAuthData]);
 
   // Sync to local storage
   useEffect(() => {
@@ -183,7 +182,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateUserProfile, activities, registeredUsers, logActivity, clearActivities, deleteUser, resetAuthData, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateUserProfile, activities, registeredUsers, logActivity, clearActivities, deleteUser, resetAuthData, refreshAuthData, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );
