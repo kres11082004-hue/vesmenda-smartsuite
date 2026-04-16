@@ -7,8 +7,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Global error handler for database connection
+app.use(async (req, res, next) => {
+    try {
+        await pool.query('SELECT 1');
+        next();
+    } catch (err) {
+        console.error('Database connection error:', err.message);
+        res.status(503).json({ 
+            error: 'Database connection failed', 
+            details: err.message,
+            hint: 'Check your DATABASE_URL in Vercel settings' 
+        });
+    }
+});
+
 // Healthy Check
-app.get('/api/health', (req, res) => res.json({ status: 'ok', source: 'vercel-functions' }));
+app.get(['/api/health', '/health'], (req, res) => res.json({ status: 'ok', source: 'vercel-functions' }));
 
 // Users
 app.get('/api/users', async (req, res) => {
