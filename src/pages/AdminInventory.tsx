@@ -29,7 +29,7 @@ const AdminInventory = () => {
     cost: '', 
     stock: '', 
     minStock: '',
-    units: [] as { id: string; name: string; conversionRate: number; price: number; cost: number; isBase: boolean; }[]
+    units: [] as { id: string; name: string; conversionRate: number | string; price: number | string; cost: number | string; isBase: boolean; }[]
   });
   const [detailView, setDetailView] = useState<DetailView>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -52,7 +52,7 @@ const AdminInventory = () => {
       cost: '', 
       stock: '', 
       minStock: '',
-      units: [{ id: 'u1', name: 'Piece', conversionRate: 1, price: 0, cost: 0, isBase: true }] 
+      units: [{ id: 'u1', name: 'Piece', conversionRate: 1, price: '', cost: '', isBase: true }] 
     }); 
     setDialogOpen(true); 
   };
@@ -75,7 +75,7 @@ const AdminInventory = () => {
   const addUnitForm = () => {
     setForm(prev => ({
       ...prev,
-      units: [...prev.units, { id: `u-${Date.now()}`, name: '', conversionRate: 1, price: 0, cost: 0, isBase: false }]
+      units: [...prev.units, { id: `u-${Date.now()}`, name: '', conversionRate: 1, price: '', cost: '', isBase: false }]
     }));
   };
 
@@ -106,7 +106,13 @@ const AdminInventory = () => {
     if (!form.name) { toast.error('Fill required fields'); return; }
     
     // Ensure we have at least a base unit
-    let finalUnits = [...form.units];
+    let finalUnits = form.units.map(u => ({
+      ...u,
+      price: +u.price || 0,
+      cost: +u.cost || 0,
+      conversionRate: +u.conversionRate || 1
+    }));
+    
     if (finalUnits.length === 0) {
       finalUnits = [{ id: 'u1', name: 'Piece', conversionRate: 1, price: +form.price || 0, cost: +form.cost || 0, isBase: true }];
     }
@@ -317,7 +323,7 @@ const AdminInventory = () => {
                         <Input 
                           type="number" 
                           value={unit.conversionRate} 
-                          onChange={e => updateUnitForm(unit.id, 'conversionRate', +e.target.value)}
+                          onChange={e => updateUnitForm(unit.id, 'conversionRate', e.target.value)}
                           disabled={unit.isBase}
                         />
                       </div>
@@ -326,7 +332,7 @@ const AdminInventory = () => {
                         <Input 
                           type="number" 
                           value={unit.cost} 
-                          onChange={e => updateUnitForm(unit.id, 'cost', +e.target.value)}
+                          onChange={e => updateUnitForm(unit.id, 'cost', e.target.value)}
                         />
                       </div>
                       <div className="col-span-1 space-y-1">
@@ -334,7 +340,7 @@ const AdminInventory = () => {
                         <Input 
                           type="number" 
                           value={unit.price} 
-                          onChange={e => updateUnitForm(unit.id, 'price', +e.target.value)}
+                          onChange={e => updateUnitForm(unit.id, 'price', e.target.value)}
                         />
                       </div>
                       <div className="col-span-1 flex items-center justify-end">

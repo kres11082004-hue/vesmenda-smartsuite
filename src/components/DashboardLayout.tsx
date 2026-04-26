@@ -42,9 +42,8 @@ export function DashboardLayout({ children, allowedRoles }: Props) {
               <div 
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium border cursor-pointer transition-colors ${
                   status === 'online' ? 'bg-success/10 text-success border-success/20 hover:bg-success/20' :
-                  status === 'offline' ? 'bg-warning/10 text-warning border-warning/20 hover:bg-warning/20' :
                   status === 'syncing' ? 'bg-primary/10 text-primary border-primary/20 cursor-wait' :
-                  'bg-destructive/10 text-destructive border-destructive/20'
+                  'bg-warning/10 text-warning border-warning/20 hover:bg-warning/20'
                 }`}
                 onClick={() => {
                   if (status === 'offline' && queueLength > 0 && !navigator.onLine) toast.error('Check your internet connection to sync.');
@@ -53,14 +52,13 @@ export function DashboardLayout({ children, allowedRoles }: Props) {
                 title={queueLength > 0 ? `${queueLength} changes pending sync` : 'All data synced'}
               >
                 {status === 'online' && <CheckCircle2 className="w-3.5 h-3.5" />}
-                {status === 'offline' && <CloudOff className="w-3.5 h-3.5" />}
+                {(status === 'offline' || status === 'error') && <CloudOff className="w-3.5 h-3.5" />}
                 {status === 'syncing' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                {status === 'error' && <AlertCircle className="w-3.5 h-3.5" />}
                 
                 <span className="hidden sm:inline">
                   {status === 'online' ? 'Synced' :
-                   status === 'offline' ? `Pending (${queueLength})` :
-                   status === 'syncing' ? 'Syncing...' : 'Sync Error'}
+                   status === 'syncing' ? 'Syncing...' : 
+                   `Pending Sync (${queueLength})`}
                 </span>
               </div>
 

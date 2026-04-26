@@ -288,7 +288,7 @@ const AdminHR = () => {
               </table>
             </div>
             <Button onClick={printPayroll} variant="outline" className="w-full">
-              <Printer className="w-4 h-4 mr-2" />Print Summary
+              <Printer className="w-4 h-4 mr-2" />Print Payroll
             </Button>
             <p className="text-[10px] text-center text-muted-foreground mt-2 italic">
               Tip: Hover over employees to print individual payslips
